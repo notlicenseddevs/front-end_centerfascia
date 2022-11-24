@@ -14,7 +14,7 @@ class _HW_ControlState extends State<HW_Control> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          backgroundColor: Colors.black45,
+          backgroundColor: Color(0x303030),
           centerTitle: true,
           elevation: 0,
           leading: Container(),
