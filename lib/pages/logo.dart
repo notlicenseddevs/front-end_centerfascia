@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:centerfascia_application/pages/home.dart';
 
 class Logo extends StatefulWidget {
   const Logo({Key? key}) : super(key: key);
@@ -8,31 +10,26 @@ class Logo extends StatefulWidget {
 }
 
 class _LogoState extends State<Logo> {
-  void setupLogo() async{
+  /*void setupLogo() async {
     Future<void> wait = justforwait();
     Navigator.pushReplacementNamed(context, '/home');
   }
 
-  Future<void> justforwait(){
-    return Future<void>.delayed(Duration(seconds : 3), (){
+  Future<void> justforwait() {
+    return Future<void>.delayed(Duration(seconds: 3), () {});
+  }*/
+
+  void initState() {
+    Timer(Duration(milliseconds: 1500), () {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
     });
-  }
-
-  void initState(){
-    super.initState();
+    /*super.initState();
     print('LOGO waiting\n');
-    setupLogo();
-
+    setupLogo();*/
   }
 
   @override
-  Widget build(BuildContext context){
-    return Scaffold(
-        body: Center(
-            child:Text(
-                "L O G O"
-            )
-        )
-    );
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Text("L O G O")));
   }
 }

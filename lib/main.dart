@@ -8,13 +8,12 @@ import 'package:centerfascia_application/pages/logo.dart';
 void main() {
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/logo',
       routes: {
-        /*
         '/home': (context) => Home(),
-        '/youtube_playlist' : (context) => YoutubePlaylist(),
-        '/hw_control' : (context) => HW_Control(),
-        '/google_maps' : (context) => GoogleMaps(),
-        //'/logo' : (context) => Logo(),*/
+        '/youtube_playlist': (context) => YoutubePlaylist(),
+        '/hw_control': (context) => HW_Control(),
+        '/google_maps': (context) => GoogleMaps(),
+        '/logo': (context) => Logo(),
       }));
 }

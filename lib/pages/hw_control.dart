@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-class HW_Control extends StatefulWidget{
+class HW_Control extends StatefulWidget {
   const HW_Control({Key? key}) : super(key: key);
 
   @override
   State<HW_Control> createState() => _HW_ControlState();
 }
 
+class _HW_ControlState extends State<HW_Control> {
+  ////put stuff here//////
 
-class _HW_ControlState extends State<HW_Control>{
+  //////ye////
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -18,9 +20,6 @@ class _HW_ControlState extends State<HW_Control>{
           leading: Container(),
           title: Text('HW_Control'),
         ),
-        body: Container(
-
-        )
-    );
+        body: Container());
   }
 }
