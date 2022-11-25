@@ -11,7 +11,7 @@ class HW_Control extends StatefulWidget {
 }
 
 class _HW_ControlState extends State<HW_Control> {
-  int index = 0;
+  int index = 1;
   bool isExtended = false;
 
   final selectedColor = Colors.white;
@@ -44,7 +44,7 @@ class _HW_ControlState extends State<HW_Control> {
                   height: 62,
                   fit: BoxFit.fitHeight,
                   image: NetworkImage(
-                    'https://i.ibb.co/yNSW8p3/pepe1.jpg',
+                    'https://media.tenor.com/jHvyFefhKmcAAAAd/mujikcboro-seriymujik.gif',
                   ),
                   child: InkWell(
                     onTap: () => setState(() => isExtended = !isExtended),
@@ -79,9 +79,9 @@ class _HW_ControlState extends State<HW_Control> {
   Widget buildPages() {
     switch (index) {
       case 0:
-        return HW_Seat(); //매뉴로 돌아가기
+        return HW_Control(); //매뉴로 돌아가기
       case 1:
-        return HW_Control(); //하트
+        return HW_Seat(); //하트
       case 2:
         return HW_Control(); //톱니 위에
       default:
