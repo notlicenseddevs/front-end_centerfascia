@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
+import 'package:centerfascia_application/pages/hw_settings/hw_light.dart';
+import 'package:centerfascia_application/pages/hw_settings/hw_mirror.dart';
+import 'package:centerfascia_application/pages/hw_settings/hw_seat.dart';
 
 class HW_Control extends StatefulWidget {
   const HW_Control({Key? key}) : super(key: key);
@@ -9,145 +11,81 @@ class HW_Control extends StatefulWidget {
 }
 
 class _HW_ControlState extends State<HW_Control> {
-  ////put stuff here//////
-  /// // Track the currently selected item here. Only used for
-  // tablet layouts.
-  //////ye////
-  // The contents of views
-  // Only the content associated with the selected tab is displayed on the screen
-  final List<Widget> _mainContents = [
-    // Content for Home tab
-    Container(
-      color: Colors.grey[850],
-      alignment: Alignment.center,
-      child: const Text(
-        'Home',
-        style: TextStyle(fontSize: 40),
-      ),
-    ),
-    // Content for Feed tab
-    Container(
-      color: Colors.grey[850],
-      alignment: Alignment.center,
-      child: const Text(
-        'Feed',
-        style: TextStyle(fontSize: 40),
-      ),
-    ),
-    // Content for Favorites tab
-    Container(
-      color: Colors.grey[850],
-      alignment: Alignment.center,
-      child: const Text(
-        'Favorites',
-        style: TextStyle(fontSize: 40),
-      ),
-    ),
-    // Content for Settings tab
-    Container(
-      color: Colors.grey[850],
-      alignment: Alignment.center,
-      child: const Text(
-        'Settings',
-        style: TextStyle(fontSize: 40),
-      ),
-    )
-  ];
+  int index = 0;
+  bool isExtended = false;
 
-  // The index of the selected tab
-  // In the beginning, the Home tab is selected
-  int _selectedIndex = 0;
+  final selectedColor = Colors.white;
+  final unselectedColor = Colors.white60;
+  final labelStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Show the bottom tab bar if screen width < 640
-      bottomNavigationBar: MediaQuery.of(context).size.width < 640
-          ? BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              unselectedItemColor: Colors.grey,
-              selectedItemColor: Colors.indigoAccent,
-              // called when one tab is selected
-              onTap: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              // bottom tab items
-              items: const [
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.home), label: 'Home'),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.feed), label: 'Feed'),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.favorite), label: 'Favorites'),
-                  BottomNavigationBarItem(
-                      icon: Icon(Icons.settings), label: 'Settings')
-                ])
-          : null,
-      body: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          // Show the navigaiton rail if screen width >= 640
-          if (MediaQuery.of(context).size.width >= 640)
+  Widget build(BuildContext context) => Scaffold(
+        body: Row(
+          children: [
             NavigationRail(
-              backgroundColor: Colors.blue[800], //changes nav rail color
-              minWidth: 55.0,
-              selectedIndex: _selectedIndex,
-              // Called when one tab is selected
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              labelType: NavigationRailLabelType.all,
-              selectedLabelTextStyle: const TextStyle(
-                color: Colors.amber,
-              ),
-              leading: Column(
-                children: const [
-                  SizedBox(
-                    height: 8,
+              backgroundColor: Theme.of(context).primaryColor,
+              //labelType: NavigationRailLabelType.all,
+              selectedIndex: index,
+              extended: isExtended,
+              //groupAlignment: 0,
+              selectedLabelTextStyle: labelStyle.copyWith(color: selectedColor),
+              unselectedLabelTextStyle:
+                  labelStyle.copyWith(color: unselectedColor),
+              selectedIconTheme: IconThemeData(color: selectedColor, size: 50),
+              unselectedIconTheme:
+                  IconThemeData(color: unselectedColor, size: 50),
+              onDestinationSelected: (index) =>
+                  setState(() => this.index = index),
+              leading: Material(
+                clipBehavior: Clip.hardEdge,
+                shape: CircleBorder(),
+                child: Ink.image(
+                  width: 62,
+                  height: 62,
+                  fit: BoxFit.fitHeight,
+                  image: NetworkImage(
+                    'https://i.ibb.co/yNSW8p3/pepe1.jpg',
                   ),
-                  CircleAvatar(
-                    radius: 20,
-                    child: Icon(Icons.person),
+                  child: InkWell(
+                    onTap: () => setState(() => isExtended = !isExtended),
                   ),
-                ],
+                ),
               ),
-              unselectedLabelTextStyle: const TextStyle(),
-              // navigation rail items
-              destinations: const [
+              destinations: [
                 NavigationRailDestination(
-                    icon: Icon(Icons.home), label: Text('Home')),
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
                 NavigationRailDestination(
-                    icon: Icon(Icons.feed), label: Text('Feed')),
+                  icon: Icon(Icons.favorite_border),
+                  selectedIcon: Icon(Icons.favorite),
+                  label: Text('Favourites'),
+                ),
                 NavigationRailDestination(
-                    icon: Icon(Icons.favorite), label: Text('Favorites')),
+                  icon: Icon(Icons.face),
+                  label: Text('Profile'),
+                ),
                 NavigationRailDestination(
-                    icon: Icon(Icons.settings), label: Text('Settings')),
+                  icon: Icon(Icons.settings),
+                  label: Text('Settings'),
+                ),
               ],
             ),
+            Expanded(child: buildPages()),
+          ],
+        ),
+      );
 
-          // Main content
-          // This part is always shown
-          // You will see it on both small and wide screen
-          Expanded(child: _mainContents[_selectedIndex]),
-        ],
-      ),
-    );
+  Widget buildPages() {
+    switch (index) {
+      case 0:
+        return HW_Seat(); //매뉴로 돌아가기
+      case 1:
+        return HW_Control(); //하트
+      case 2:
+        return HW_Control(); //톱니 위에
+      default:
+        return HW_Seat();
+    }
   }
-  //return Scaffold(
-  /*appBar: AppBar(
-          backgroundColor: Colors.black,
-          centerTitle: true,
-          elevation: 0,
-          leading: Container(),
-          title: Text('HW_Control'),
-        ),*/
-  //body:Scaffold(
-
-  //),
-  //color: Colors.grey[800],
-  //);
 }
