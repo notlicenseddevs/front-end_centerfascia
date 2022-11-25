@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_light.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_mirror.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_seat.dart';
+//import 'package:centerfascia_application/pages/hw_settings/hw_pop.dart';
 
 class HW_Control extends StatefulWidget {
   const HW_Control({Key? key}) : super(key: key);
@@ -17,6 +18,10 @@ class _HW_ControlState extends State<HW_Control> {
   final selectedColor = Colors.white;
   final unselectedColor = Colors.white60;
   final labelStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 16);
+
+  void leave() {
+    Navigator.popUntil(context, ModalRoute.withName("/home"));
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -54,20 +59,20 @@ class _HW_ControlState extends State<HW_Control> {
               destinations: [
                 NavigationRailDestination(
                   icon: Icon(Icons.home),
-                  label: Text('Home'),
+                  label: Text('메인 매뉴'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.favorite_border),
                   selectedIcon: Icon(Icons.favorite),
-                  label: Text('Favourites'),
+                  label: Text('운전석'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.face),
-                  label: Text('Profile'),
+                  label: Text('사이드/리어 미러'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.settings),
-                  label: Text('Settings'),
+                  label: Text('무드 라이팅'),
                 ),
               ],
             ),
@@ -77,15 +82,18 @@ class _HW_ControlState extends State<HW_Control> {
       );
 
   Widget buildPages() {
+    //나중에 매뉴 돌아가는 버튼 만들기
     switch (index) {
       case 0:
-        return HW_Control(); //매뉴로 돌아가기
+        //checkindex();
+        return HW_Seat(); //매뉴로 돌아가기
       case 1:
         return HW_Seat(); //하트
       case 2:
-        return HW_Control(); //톱니 위에
+        return HW_Mirror(); //톱니 위에
       default:
-        return HW_Seat();
+        return HW_Light();
     }
   }
 }
+///////////메인 매뉴로 돌아가는건 따로 버튼 만들어야할것 같음
