@@ -1,5 +1,10 @@
+import 'dart:html';
+
 import 'package:geolocator/geolocator.dart';
 
 class GeolocatorService {
-  //Future<Position> getCurrentLocation
+  Future<Position> getCurrentLocation() async{
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high);
+  }
 }
