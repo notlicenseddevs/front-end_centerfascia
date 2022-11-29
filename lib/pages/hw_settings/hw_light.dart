@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:centerfascia_application/variables.dart';
 
 class HW_Light extends StatefulWidget {
   const HW_Light({Key? key}) : super(key: key);
@@ -9,8 +10,8 @@ class HW_Light extends StatefulWidget {
 }
 
 class _HW_LightState extends State<HW_Light> {
-  Color _color = Colors.blue;
-
+  //Color _color = Colors.blue;
+  Color _color = appData.glocol;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,7 +32,7 @@ class _HW_LightState extends State<HW_Light> {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.grey,
                     ),
                   ),
                 ),

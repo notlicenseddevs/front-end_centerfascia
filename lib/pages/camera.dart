@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:centerfascia_application/pages/home.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:centerfascia_application/variables.dart';
+import 'package:mqtt_client/mqtt_client.dart';
 
 class CameraAuth extends StatefulWidget {
   const CameraAuth({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class CameraAuth extends StatefulWidget {
 
 class _CameraAuthState extends State<CameraAuth> {
   File? _image;
-  bool user_authorized = false; //서버에서 인증받고 맞으면 홈화면으로 넘어가기
+  //bool user_authorized = true; //서버에서 인증받고 맞으면 홈화면으로 넘어가기
   final picker = ImagePicker();
 
   // 비동기 처리를 통해 카메라와 갤러리에서 이미지를 가져온다.
@@ -25,7 +27,7 @@ class _CameraAuthState extends State<CameraAuth> {
       _image = File(image!.path); // 가져온 이미지를 _image에 저장
     });
 
-    if (user_authorized == true) {
+    if (appData.user_auth == true) {
       //유저인증 완료시 다음페이지로 이동
       Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
     } else {

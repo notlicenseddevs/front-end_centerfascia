@@ -1,6 +1,6 @@
-//import 'dart:html';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:centerfascia_application/variables.dart';
 
 class HW_Seat extends StatefulWidget {
   const HW_Seat({Key? key}) : super(key: key);
@@ -11,8 +11,8 @@ class HW_Seat extends StatefulWidget {
 
 class _HW_SeatState extends State<HW_Seat> {
   late Timer _timer;
-  var _topang = 90;
-  var _botdist = 50;
+  var _topang = appData.topang;
+  var _botdist = appData.botdist;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,11 +64,13 @@ class _HW_SeatState extends State<HW_Seat> {
                     //finish timer when "unpressing" button
                     //print('up'); //used for debug
                     _timer.cancel();
+                    appData.topang = _topang;
                   },
                   onTapCancel: () {
                     //몰?루
                     //print('cancel');
                     _timer.cancel();
+                    appData.topang = _topang;
                   },
                 ),
                 Text("등받이", style: TextStyle(fontSize: 25, color: Colors.blue)),
@@ -99,10 +101,12 @@ class _HW_SeatState extends State<HW_Seat> {
                   onTapUp: (TapUpDetails details) {
                     //print('up');
                     _timer.cancel();
+                    appData.topang = _topang;
                   },
                   onTapCancel: () {
                     //print('cancel');
                     _timer.cancel();
+                    appData.topang = _topang;
                   },
                 ),
               ],
@@ -140,10 +144,12 @@ class _HW_SeatState extends State<HW_Seat> {
                   onTapUp: (TapUpDetails details) {
                     //print('up');
                     _timer.cancel();
+                    appData.botdist = _botdist;
                   },
                   onTapCancel: () {
                     //print('cancel');
                     _timer.cancel();
+                    appData.botdist = _botdist;
                   },
                 ),
                 Text("앞뒤 조절",
@@ -175,10 +181,12 @@ class _HW_SeatState extends State<HW_Seat> {
                   onTapUp: (TapUpDetails details) {
                     //print('up');
                     _timer.cancel();
+                    appData.botdist = _botdist;
                   },
                   onTapCancel: () {
                     // print('cancel');
                     _timer.cancel();
+                    appData.botdist = _botdist;
                   },
                 ),
               ],
