@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:centerfascia_application/variables.dart';
 
 class HW_Mirror extends StatefulWidget {
   const HW_Mirror({Key? key}) : super(key: key);
@@ -10,9 +11,9 @@ class HW_Mirror extends StatefulWidget {
 
 class _HW_MirrorState extends State<HW_Mirror> {
   late Timer _timer;
-  var _leftang = 30;
-  var _rightang = 30;
-  var _rearang = 90;
+  var _leftang = appData.gloleftang;
+  var _rightang = appData.glorightang;
+  var _rearang = appData.glorearang;
   final mirrors = Container(
     child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -66,11 +67,13 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+                      appData.gloleftang = _leftang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.gloleftang = _leftang;
                     },
                   ),
                   Text(
@@ -111,11 +114,13 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+                      appData.gloleftang = _leftang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.gloleftang = _leftang;
                     },
                   ),
                   //leftmirror finishes
@@ -151,11 +156,14 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+
+                      appData.glorearang = _rearang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.glorearang = _rearang;
                     },
                   ),
                   Text(
@@ -196,11 +204,13 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+                      appData.glorearang = _rearang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.glorearang = _rearang;
                     },
                   ),
                   //RearMirror Finishes
@@ -236,11 +246,13 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+                      appData.glorightang = _rightang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.glorightang = _rightang;
                     },
                   ),
                   Text(
@@ -281,11 +293,13 @@ class _HW_MirrorState extends State<HW_Mirror> {
                       //finish timer when "unpressing" button
                       //print('up'); //used for debug
                       _timer.cancel();
+                      appData.glorightang = _rightang;
                     },
                     onTapCancel: () {
                       //몰?루
                       //print('cancel');
                       _timer.cancel();
+                      appData.glorightang = _rightang;
                     },
                   ),
                   ///////////////Right Mirror Finishes
