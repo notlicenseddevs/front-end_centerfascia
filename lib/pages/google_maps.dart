@@ -21,9 +21,7 @@ class _GoogleMapsState extends State<GoogleMaps>{
   //init state, sogang_university
   final LatLng _center = const LatLng(37.556909,126.9378836);
 
-  //Set<Marker> _markers = Set();
   GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
-
   CameraPosition _initialCameraPostion = CameraPosition(
     target: LatLng(37.382782, 127.1189054),
     zoom: 14,
@@ -37,9 +35,9 @@ class _GoogleMapsState extends State<GoogleMaps>{
     ['집', '10', '20', 'www.naver.com' ],
     ['학교', '20', '30', 'www.google.com' ],
     ['맛집', '30', '40', 'www.daum.com' ],
-    ['맛집', '60', '90', 'www.daum.com' ],
-    ['맛집', '70', '70', 'www.daum.com' ],
-    ['맛집', '80', '50', 'www.daum.com' ],
+    ['최가 돈까스', '37.3689003','127.1064754', 'www.daum.com' ],
+    ['찰리스 버거', '37.3686529', '127.1122212', 'www.daum.com' ],
+    ['다이호시', '37.384143','127.1116396', 'www.daum.com' ],
     ['맛집', '90', '10', 'www.daum.com' ],
     ['맛집', '100', '20', 'www.daum.com' ],
     ['종점', '40', '50', 'www.bing.com' ]
@@ -55,18 +53,37 @@ class _GoogleMapsState extends State<GoogleMaps>{
         infoWindow: InfoWindow(title: 'My Position', snippet: 'Where am I?'),)
     );
   }
-
   var Marker_1 = LatLng(37.898989, 129.362536);
-  Set<Marker> _createMarker(){
-    return <Marker>[
-      Marker(
-        markerId: MarkerId("marker_1"),
-        position: Marker_1,
+  void _createMarker(String markerID, double lat, double lng, String url) async{
+    var marker_loc = LatLng(lat, lng);
+    setState((){
+      _initialCameraPostion = CameraPosition(
+        target: marker_loc,
+        zoom: 14,
+      );
+      mapController.moveCamera(CameraUpdate.newCameraPosition(_initialCameraPostion));
+      var _origin = Marker(
+        markerId: MarkerId(markerID),
+        position: marker_loc,
         infoWindow: InfoWindow(
           title: "주소"
         ),
-      ),
-    ].toSet();
+      );
+      _markers.add(_origin);
+
+    });
+  }
+  late final Set<Marker> _markers = {};
+  void _addMarker(LatLng pos) async {
+    setState((){
+
+      var _origin = Marker(
+        markerId: const MarkerId("origin"),
+        infoWindow: const InfoWindow(title: "Origin"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        position: pos,
+      );
+    });
   }
 
   void _gotoSpace(){
@@ -81,16 +98,19 @@ class _GoogleMapsState extends State<GoogleMaps>{
          ),
          builder: (context){
            return SingleChildScrollView(
+             scrollDirection: Axis.vertical,
              child:Container(
                padding: EdgeInsets.only(
                  bottom:MediaQuery.of(context).viewInsets.bottom,
                ),
                child:Column(
                  mainAxisSize: MainAxisSize.min,
+                 mainAxisAlignment: MainAxisAlignment.start,
+                 crossAxisAlignment: CrossAxisAlignment.start,
                  children: <Widget>[
                    Padding(
                      padding: const EdgeInsets.only(
-                       top: 40,
+                       top: 30,
                        bottom: 20,
                        right: 20,
                        left: 20,
@@ -100,12 +120,12 @@ class _GoogleMapsState extends State<GoogleMaps>{
                        child: Padding(
                          padding: const EdgeInsets.all(8.0),
                          child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                           mainAxisAlignment: MainAxisAlignment.start,
                            crossAxisAlignment: CrossAxisAlignment.start,
                            children: [
-                             Text("Yaowjfoia",
-                             textAlign: TextAlign.left,),
-                             Text("saoijfwoi"),
+                             Text("test text 1"),
+                             Text("test text 2"),
+                             Text("test text 3"),
                            ]
                          ),
                        ),
@@ -131,19 +151,8 @@ class _GoogleMapsState extends State<GoogleMaps>{
         );
     });*/
   }
-  late final Set<Marker> _markers = {};
-  void _addMarker(LatLng pos) async {
-    setState((){
-      var _origin = Marker(
-        markerId: const MarkerId("origin"),
-        infoWindow: const InfoWindow(title: "Origin"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        position: pos,
-      );
-    });
-  }
 
-  Widget build(BuildContext context) {
+  Widget build (BuildContext context) {
     return Scaffold(
         body: Row(
           children: [
@@ -158,13 +167,12 @@ class _GoogleMapsState extends State<GoogleMaps>{
                   onCameraMoveStarted: (){
 
                   },
+                  myLocationButtonEnabled: true,
                   myLocationEnabled: true,
                   mapType: MapType.normal,
                   onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _center,
-                    zoom: 14.0,
-                  ),
+                  initialCameraPosition: _initialCameraPostion,
+
                   markers: _markers,
                 ),
               ),
@@ -176,7 +184,9 @@ class _GoogleMapsState extends State<GoogleMaps>{
                   itemBuilder: (BuildContext context, int index){
                     return InkWell(
                       onTap: (){ // show marker when tapped the list
-                        _gotoSpace();
+                        //_gotoSpace();
+                        _createMarker(productList[index][0], double.parse(productList[index][1]), double.parse(productList[index][2]),
+                            productList[index][3]);
                       },
                       child: Container(
                         margin: EdgeInsets.only(top: 10),
@@ -188,8 +198,10 @@ class _GoogleMapsState extends State<GoogleMaps>{
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(productList[index][0]),
-                            Text(productList[index][1]),
-                            Text(productList[index][2]),
+                            Text("Lat : ${productList[index][1]} / Lng : ${productList[index][2]}",
+                              textScaleFactor: 0.7,),
+                            Text("경기도 서울시 캘리포니아구 뉴욕동 지하2층 벙커 302호",
+                            textScaleFactor: 0.8,),
                             Text(productList[index][3]),
                           ]
                         )
