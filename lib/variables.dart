@@ -12,6 +12,7 @@ class Appdata {
   var glorearang = 30;
   var topang = 90;
   var botdist = 50;
+
   bool user_auth = true;
   factory Appdata() {
     return _appData;

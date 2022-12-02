@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -47,13 +48,34 @@ class _GoogleMapsState extends State<GoogleMaps>{
   @override
   void initState() {
     super.initState();
-
     _markers.add(
       Marker(markerId: MarkerId('myInitialPosition'), position: LatLng(37.382782, 127.1189054),
         infoWindow: InfoWindow(title: 'My Position', snippet: 'Where am I?'),)
     );
   }
   var Marker_1 = LatLng(37.898989, 129.362536);
+
+
+  late final Set<Marker> _markers = {};
+  void _addMarker(LatLng pos) async {
+    setState((){
+      var _origin = Marker(
+        markerId: const MarkerId("origin"),
+        infoWindow: const InfoWindow(title: "Origin"),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+        position: pos,
+      );
+    });
+  }
+
+  Future<Position> getUserCurrentLocation() async{
+    await Geolocator.requestPermission().then((value) {
+    }).onError((error, stackTrace) async{
+      await Geolocator.requestPermission();
+      print("ERROR" + error.toString());
+    });
+    return await Geolocator.getCurrentPosition();
+  }
   void _createMarker(String markerID, double lat, double lng, String url) async{
     var marker_loc = LatLng(lat, lng);
     setState((){
@@ -66,26 +88,13 @@ class _GoogleMapsState extends State<GoogleMaps>{
         markerId: MarkerId(markerID),
         position: marker_loc,
         infoWindow: InfoWindow(
-          title: "주소"
+          title: markerID
         ),
       );
+      _markers.clear();
       _markers.add(_origin);
-
     });
   }
-  late final Set<Marker> _markers = {};
-  void _addMarker(LatLng pos) async {
-    setState((){
-
-      var _origin = Marker(
-        markerId: const MarkerId("origin"),
-        infoWindow: const InfoWindow(title: "Origin"),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        position: pos,
-      );
-    });
-  }
-
   void _gotoSpace(){
      showModalBottomSheet(
          context: context,
@@ -154,6 +163,13 @@ class _GoogleMapsState extends State<GoogleMaps>{
 
   Widget build (BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed:() async {
+      getUserCurrentLocation().then((value) async {
+        print(value.latitude.toString() +" "+value.longitude.toString());
+        _createMarker("Current Location", value.latitude, value.longitude, "www.naver.com");
+      }
+      );}),
         body: Row(
           children: [
             Expanded(

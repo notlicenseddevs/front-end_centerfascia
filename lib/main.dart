@@ -9,7 +9,7 @@ import 'package:centerfascia_application/pages/logo.dart';
 void main() {
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/camera',
+      initialRoute: '/home',
       routes: {
         '/home': (context) => Home(),
         '/youtube_playlist': (context) => YoutubePlaylist(),
