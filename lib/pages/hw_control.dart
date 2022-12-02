@@ -59,7 +59,7 @@ class _HW_ControlState extends State<HW_Control> {
               destinations: [
                 NavigationRailDestination(
                   icon: Icon(Icons.home),
-                  label: Text('메인 매뉴'),
+                  label: Text('메인 메뉴'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.favorite_border),
