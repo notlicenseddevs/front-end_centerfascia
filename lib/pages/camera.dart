@@ -6,6 +6,8 @@ import 'package:centerfascia_application/pages/home.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:centerfascia_application/variables.dart';
 import 'package:mqtt_client/mqtt_client.dart';
+import 'package:centerfascia_application/mqtt_client.dart';
+
 
 class CameraAuth extends StatefulWidget {
   const CameraAuth({Key? key}) : super(key: key);
