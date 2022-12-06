@@ -32,9 +32,12 @@ dependencies:
   http: ^0.13.5
   url_launcher: ^6.1.6
   youtube_api: ^1.0.4
+  youtube_player_flutter:
   google_maps_flutter: ^2.2.1
   provider: ^6.0.4  # wrapper, inheritedWidget
   geolocator: ^9.0.2 # api for generic location
+  location:
+  flutter_form_builder:
   get: ^4.6.5
   image_picker: ^0.8.4+4
   fluttertoast: ^8.0.8
