@@ -5,9 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:centerfascia_application/pages/home.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:centerfascia_application/variables.dart';
-import 'package:mqtt_client/mqtt_client.dart';
 import 'package:centerfascia_application/mqtt_client.dart';
-
 
 class CameraAuth extends StatefulWidget {
   const CameraAuth({Key? key}) : super(key: key);
@@ -15,6 +13,8 @@ class CameraAuth extends StatefulWidget {
   @override
   _CameraAuthState createState() => _CameraAuthState();
 }
+
+mqttConnection mqtt = mqttConnection();
 
 class _CameraAuthState extends State<CameraAuth> {
   File? _image;
@@ -24,15 +24,19 @@ class _CameraAuthState extends State<CameraAuth> {
   // 비동기 처리를 통해 카메라와 갤러리에서 이미지를 가져온다.
   Future getImage(ImageSource imageSource) async {
     final image = await picker.pickImage(source: imageSource);
-
+    //selfie mode: https://stackoverflow.com/questions/61428825/flutter-imagepicker-opens-in-selfie-mode-when-cameradevice-rear-selected
     setState(() {
       _image = File(image!.path); // 가져온 이미지를 _image에 저장
     });
-
-    if (appData.user_auth == true) {
+    String facemsg = '{"cmd_type":0,"face_img":"ssssssssss"}';
+    //requestToServer(facemsg);
+    mqtt.requestToServer(facemsg);
+    await Future.delayed(const Duration(seconds: 3)); //매칭 시간에 따라 늘려야 할 수도 있음
+    if (mqttConnection.faceauthdone == true) {
       //유저인증 완료시 다음페이지로 이동
       Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
     } else {
+      print("failefslaiejlaie\n");
       Fluttertoast.showToast(
         msg: "사용자 식별을 하지 못했습니다. 다시 찍어주세요",
         toastLength: Toast.LENGTH_LONG,
@@ -86,15 +90,6 @@ class _CameraAuthState extends State<CameraAuth> {
                     },
                   )),
                 ),
-
-                // 갤러리에서 이미지를 가져오는 버튼
-                /*FloatingActionButton(
-                  child: Icon(Icons.wallpaper),
-                  tooltip: 'pick Iamge',
-                  onPressed: () {
-                    getImage(ImageSource.gallery);
-                  },
-                ),*/
               ],
             ),
           ],
