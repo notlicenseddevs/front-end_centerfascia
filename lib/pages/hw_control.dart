@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_light.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_mirror.dart';
 import 'package:centerfascia_application/pages/hw_settings/hw_seat.dart';
+import 'package:centerfascia_application/pages/hw_settings/hw_handle.dart';
 //import 'package:centerfascia_application/pages/hw_settings/hw_pop.dart';
 
 class HW_Control extends StatefulWidget {
@@ -58,20 +59,21 @@ class _HW_ControlState extends State<HW_Control> {
               ),
               destinations: [
                 NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('메인 메뉴'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.favorite_border),
-                  selectedIcon: Icon(Icons.favorite),
+                  icon: Image.asset('image/car_seat.png'),
                   label: Text('운전석'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.face),
+                  icon: Image.asset(
+                    'image/side-mirror-256.png',
+                  ),
                   label: Text('사이드/리어 미러'),
                 ),
                 NavigationRailDestination(
-                  icon: Icon(Icons.settings),
+                  icon: Image.asset('image/steering_wheel.png'),
+                  label: Text('핸들'),
+                ),
+                NavigationRailDestination(
+                  icon: Image.asset('image/lighting.png'),
                   label: Text('무드 라이팅'),
                 ),
               ],
@@ -88,9 +90,11 @@ class _HW_ControlState extends State<HW_Control> {
         //checkindex();
         return HW_Seat(); //매뉴로 돌아가기
       case 1:
-        return HW_Seat(); //하트
+        return HW_Mirror(); //하트
       case 2:
-        return HW_Mirror(); //톱니 위에
+        return HW_handle(); //톱니 위에
+      case 3:
+        return HW_Light(); //핸들
       default:
         return HW_Light();
     }

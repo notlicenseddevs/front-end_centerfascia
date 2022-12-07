@@ -10,6 +10,9 @@ class mqttConnection {
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
   static late StreamController<dynamic> _placeDataStream;
+  static late StreamController<bool> _cameraCheckStream;
+  static late StreamController<dynamic> _hwDataStream;
+  static late StreamController<bool> _pinCheckStream;
   ////나중에 logout할때 싹 초기화 시키고 나갈것/////
   static bool faceauthdone = false;
   static bool faceautprocessing = false;
@@ -47,8 +50,10 @@ class mqttConnection {
     serverToClientTopic = '${json['topic_name']}';
     clientToServerTopic = '${json['topic_name']}/user_command';
     client.subscribe('${serverToClientTopic}/reply', MqttQos.atMostOnce);
-    client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
-    client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
+    ////////////////////관우야 너꺼다
+    //client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
+    //client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
+    /////////////////관우야 너꺼다
     client.subscribe('${serverToClientTopic}/hw_configs', MqttQos.atMostOnce);
   }
 
@@ -75,6 +80,31 @@ class mqttConnection {
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
+  //stream request for camera
+  void cameraRequest(String msg, StreamController<bool> check) async {
+    _cameraCheckStream = check;
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void hwRequest(String msg, StreamController<dynamic> data) async {
+    final builder = MqttClientPayloadBuilder();
+    _hwDataStream = data;
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void pinRequest(String msg, StreamController<bool> check) async {
+    _pinCheckStream = check;
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
   void replyHandler(dynamic json) {
     int request_type = json['request_type'];
     if (request_type == 1) {
@@ -82,11 +112,25 @@ class mqttConnection {
       print(isSucceed);
       _loginCheckStream.add(isSucceed);
     }
+    if (request_type == 0) {
+      print("camera finished");
+      print("I AM HERE ");
+      print(json['succeed'].runtimeType);
+      bool isSuceed = json['succeed'];
+      _cameraCheckStream.add(isSuceed);
+    }
+    if (request_type == 2) {
+      print('Pin auth');
+      print(json['succeed'].runtimeType);
+      bool isSuceed = json['succeed'];
+      _pinCheckStream.add(isSuceed);
+    }
     return;
   }
 
   void hwHandler(dynamic json) {
     print(json);
+    _hwDataStream.add(json);
   }
 
   void swHandler(dynamic json) {
@@ -101,6 +145,20 @@ class mqttConnection {
   void faceauthHandler(dynamic json) {
     bool tf = json['succeed'];
     faceauthdone = tf;
+    //return tf;
+    /*if (tf == true) {
+      faceauthcorrect();
+    } else {
+      faceauthincorrect();
+    }*/
+  }
+
+  bool faceauthcorrect() {
+    return true;
+  }
+
+  bool faceauthincorrect() {
+    return false;
   }
 
   void messageHandler(String topic, String msg) {
@@ -110,13 +168,13 @@ class mqttConnection {
       initialConnectionHandler(json);
       return;
     }
-    if (topic == '${serverToClientTopic}/reply' && json['request_type'] == 0) {
+    /*if (topic == '${serverToClientTopic}/reply' && json['request_type'] == 0) {
       //deals with face authentication
+      appData.facejson = json;
       print("face auth started!\n");
       faceauthHandler(json);
-      faceautprocessing = true;
       return;
-    }
+    }*/ //나중에 필요하면 살려야할수도 있음
     if (topic == '${serverToClientTopic}/reply') {
       replyHandler(json);
       return;
@@ -177,6 +235,5 @@ class mqttConnection {
     builder.addString(
         '{"dev_type":0,"device_id":"adcc","timestamp":14141,"public_key":"3421a"}');
     client.publishMessage(topic2, MqttQos.exactlyOnce, builder.payload!);
-    print("sssssssssssffffffffffffffffffffffff\n");
   }
 }
