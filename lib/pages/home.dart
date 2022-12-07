@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:centerfascia_application/variables.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -15,13 +16,6 @@ class _HomeState extends State<Home> {
         [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     return Scaffold(
         backgroundColor: Colors.grey[850],
-        appBar: AppBar(
-          backgroundColor: Colors.black12,
-          title: Text('Centerfeisa demo'),
-          centerTitle: true,
-          elevation: 0,
-          leading: Container(),
-        ),
         body: Column(children: [
           Expanded(
               child: Row(
@@ -53,8 +47,13 @@ class _HomeState extends State<Home> {
                     padding: const EdgeInsetsDirectional.fromSTEB(2, 2, 2, 2),
                     child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/google_maps',
-                              arguments: {});
+                          if (appData.pinauth == false) {
+                            Navigator.pushNamed(context, '/pinauth',
+                                arguments: {});
+                          } else {
+                            Navigator.pushNamed(context, '/google_maps',
+                                arguments: {});
+                          }
                         },
                         child: Text("gmps control"),
                         style: ElevatedButton.styleFrom(

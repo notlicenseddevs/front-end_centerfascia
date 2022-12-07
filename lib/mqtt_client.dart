@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:convert' as convert;
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
-import 'variables.dart';
 
 class mqttConnection {
   static final MqttServerClient client = MqttServerClient('43.201.126.212', '');
@@ -12,6 +11,8 @@ class mqttConnection {
   static late StreamController<bool> _loginCheckStream;
   static late StreamController<dynamic> _placeDataStream;
   static late StreamController<bool> _cameraCheckStream;
+  static late StreamController<dynamic> _hwDataStream;
+  static late StreamController<bool> _pinCheckStream;
   ////나중에 logout할때 싹 초기화 시키고 나갈것/////
   static bool faceauthdone = false;
   static bool faceautprocessing = false;
@@ -49,8 +50,10 @@ class mqttConnection {
     serverToClientTopic = '${json['topic_name']}';
     clientToServerTopic = '${json['topic_name']}/user_command';
     client.subscribe('${serverToClientTopic}/reply', MqttQos.atMostOnce);
-    client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
-    client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
+    ////////////////////관우야 너꺼다
+    //client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
+    //client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
+    /////////////////관우야 너꺼다
     client.subscribe('${serverToClientTopic}/hw_configs', MqttQos.atMostOnce);
   }
 
@@ -86,6 +89,22 @@ class mqttConnection {
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
+  void hwRequest(String msg, StreamController<dynamic> data) async {
+    final builder = MqttClientPayloadBuilder();
+    _hwDataStream = data;
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void pinRequest(String msg, StreamController<bool> check) async {
+    _pinCheckStream = check;
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
   void replyHandler(dynamic json) {
     int request_type = json['request_type'];
     if (request_type == 1) {
@@ -100,11 +119,18 @@ class mqttConnection {
       bool isSuceed = json['succeed'];
       _cameraCheckStream.add(isSuceed);
     }
+    if (request_type == 2) {
+      print('Pin auth');
+      print(json['succeed'].runtimeType);
+      bool isSuceed = json['succeed'];
+      _pinCheckStream.add(isSuceed);
+    }
     return;
   }
 
   void hwHandler(dynamic json) {
     print(json);
+    _hwDataStream.add(json);
   }
 
   void swHandler(dynamic json) {

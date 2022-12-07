@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:centerfascia_application/pages/home.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:centerfascia_application/variables.dart';
 import 'package:centerfascia_application/mqtt_client.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:get/get.dart';
 
 import 'package:camera/camera.dart';
 
@@ -108,6 +106,36 @@ class _CameraAuthState extends State<CameraAuth> {
                           _iscorrect = v;
                           _iswrong = !v;
                           if (!_authrequest && _iscorrect && !_iswrong) {
+                            //여기다가 hw정보 받고 push 해주자
+                            //json 길이가 0이면 걍 default (이미 설정해놓음)
+                            StreamController<dynamic> hwdata =
+                                StreamController();
+                            String hwrequest = '{"cmd_type":8,"waiting_for":0}';
+                            mqtt.hwRequest(hwrequest, hwdata);
+                            hwdata.stream.listen((v) {
+                              print('hhhhhhhhhhhhhhhhhhhhhhhh\n');
+                              //rint(v.length());
+                              if (v['sidemirror_left'] != null) {
+                                appData.gloleftang = v['sidemirror_left'];
+                              }
+                              if (v['sidemirror_right'] != null) {
+                                appData.glorightang = v['sidemirror_right'];
+                              }
+                              if (v['seat_depth'] != null) {
+                                appData.botdist = v['seat_depth'];
+                              }
+                              if (v['seat_angle'] != null) {
+                                appData.topang = v['seat_angle'];
+                              }
+                              print("test1");
+                              if (v['moodlight_color'] != null) {
+                                appData.glocol = HexColor(v['moodlight_color']);
+                              }
+                              print("test2");
+                              if (v['backmirror_angle'] != null) {
+                                appData.glorearang = v['backmirror_angle'];
+                              }
+                            });
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -125,14 +153,6 @@ class _CameraAuthState extends State<CameraAuth> {
           label: Text("Capture"),
         ),
         camauthResult(),
-        /*Container(
-          //show captured image
-          padding: EdgeInsets.all(30),
-          child: image == null
-              ? Text("No image captured")
-              : Image.file(File(image!.path), height: 500, width: 300),
-          //display captured image
-        )*/
       ])),
     );
   }
@@ -142,32 +162,14 @@ class _CameraAuthState extends State<CameraAuth> {
       return const CircularProgressIndicator();
     }
     if (_authrequest && !(_iscorrect ^ _iswrong)) {
-      print("HHHHHHHHIIIIIIIIIIIIII\n");
       return const Text('');
     }
     if (!_authrequest && _iscorrect && !_iswrong) {
-      print("CORRRERAERAJWOER\n");
-      move = 1;
-      //sleep(const Duration(seconds: 10));
-      //Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
-      //Navigator.pushReplacementNamed(context, '/home');
-      //Navigator.of(context).pushNamed("/home");
-      //GetX.(() => Home());
       return const Text('User authorized');
     }
     if (!_authrequest && !_iscorrect && _iswrong) {
-      /*Fluttertoast.showToast(
-        msg: "사용자 식별을 하지 못했습니다. 다시 찍어주세요",
-        toastLength: Toast.LENGTH_LONG,
-        timeInSecForIosWeb: 1,
-        backgroundColor: Colors.black,
-        textColor: Colors.white,
-        fontSize: 16.0,s
-      );*/
-      print("ERRRRRRRRRRRORRRRRRRR\n");
       return const Text('FACE AUTH ERROR');
     }
-    print("몰ㄹㄹㄹㄹㄹㄹㄹ루ㅜㅜㅜㅜㅜㅜ");
     return const Text('');
   }
 }

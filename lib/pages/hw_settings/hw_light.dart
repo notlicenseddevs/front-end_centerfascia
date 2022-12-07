@@ -18,6 +18,7 @@ class _HW_LightState extends State<HW_Light> {
       /*appBar: AppBar(
         title: Text(widget.title),
       ),*/
+      backgroundColor: Colors.grey[800],
       body: Center(
         child: Column(
           children: [
