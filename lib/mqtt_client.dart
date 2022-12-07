@@ -13,6 +13,11 @@ class mqttConnection {
   static late StreamController<bool> _cameraCheckStream;
   static late StreamController<dynamic> _hwDataStream;
   static late StreamController<bool> _pinCheckStream;
+  /////////
+  ///   1. 먼저 streamcontroller을 설정한다. 아마 json형식으로 받을경우가 많으니
+  ///      StreamController<dynamic> 으로 한 뒤에 변수명 선언한다.
+  /// ////////
+
   ////나중에 logout할때 싹 초기화 시키고 나갈것/////
   static bool faceauthdone = false;
   static bool faceautprocessing = false;
@@ -104,6 +109,10 @@ class mqttConnection {
     client.publishMessage(
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
+  ////////////
+  ////   2. 뭐시기Request를 만든다
+  ///    함수명만 알아먹게 만들고 걍 위에꺼 베끼셈
+  /// ///////
 
   void replyHandler(dynamic json) {
     int request_type = json['request_type'];
@@ -126,6 +135,10 @@ class mqttConnection {
       _pinCheckStream.add(isSuceed);
     }
     return;
+    ////////////
+    ///      3.request_type 따라 설정해주는거
+    ///       따로 request_type 받는거 있으면 그거 하고 나머지는 베껴
+    /// //////////
   }
 
   void hwHandler(dynamic json) {
