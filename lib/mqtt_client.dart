@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:convert' as convert;
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'variables.dart';
 
 class mqttConnection {
   static final MqttServerClient client = MqttServerClient('43.201.126.212', '');
@@ -10,6 +11,7 @@ class mqttConnection {
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
   static late StreamController<dynamic> _placeDataStream;
+  static late StreamController<bool> _cameraCheckStream;
   ////나중에 logout할때 싹 초기화 시키고 나갈것/////
   static bool faceauthdone = false;
   static bool faceautprocessing = false;
@@ -75,12 +77,28 @@ class mqttConnection {
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
+  //stream request for camera
+  void cameraRequest(String msg, StreamController<bool> check) async {
+    _cameraCheckStream = check;
+    final builder = MqttClientPayloadBuilder();
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
   void replyHandler(dynamic json) {
     int request_type = json['request_type'];
     if (request_type == 1) {
       bool isSucceed = json['succeed'];
       print(isSucceed);
       _loginCheckStream.add(isSucceed);
+    }
+    if (request_type == 0) {
+      print("camera finished");
+      print("I AM HERE ");
+      print(json['succeed'].runtimeType);
+      bool isSuceed = json['succeed'];
+      _cameraCheckStream.add(isSuceed);
     }
     return;
   }
@@ -101,6 +119,20 @@ class mqttConnection {
   void faceauthHandler(dynamic json) {
     bool tf = json['succeed'];
     faceauthdone = tf;
+    //return tf;
+    /*if (tf == true) {
+      faceauthcorrect();
+    } else {
+      faceauthincorrect();
+    }*/
+  }
+
+  bool faceauthcorrect() {
+    return true;
+  }
+
+  bool faceauthincorrect() {
+    return false;
   }
 
   void messageHandler(String topic, String msg) {
@@ -110,13 +142,13 @@ class mqttConnection {
       initialConnectionHandler(json);
       return;
     }
-    if (topic == '${serverToClientTopic}/reply' && json['request_type'] == 0) {
+    /*if (topic == '${serverToClientTopic}/reply' && json['request_type'] == 0) {
       //deals with face authentication
+      appData.facejson = json;
       print("face auth started!\n");
       faceauthHandler(json);
-      faceautprocessing = true;
       return;
-    }
+    }*/ //나중에 필요하면 살려야할수도 있음
     if (topic == '${serverToClientTopic}/reply') {
       replyHandler(json);
       return;
@@ -177,6 +209,5 @@ class mqttConnection {
     builder.addString(
         '{"dev_type":0,"device_id":"adcc","timestamp":14141,"public_key":"3421a"}');
     client.publishMessage(topic2, MqttQos.exactlyOnce, builder.payload!);
-    print("sssssssssssffffffffffffffffffffffff\n");
   }
 }

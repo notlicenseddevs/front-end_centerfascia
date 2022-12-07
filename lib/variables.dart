@@ -11,7 +11,7 @@ class Appdata {
   var glorearang = 30;
   var topang = 90;
   var botdist = 50;
-
+  late dynamic facejson;
   bool user_auth = true;
   factory Appdata() {
     return _appData;
