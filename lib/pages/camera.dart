@@ -115,24 +115,25 @@ class _CameraAuthState extends State<CameraAuth> {
                             hwdata.stream.listen((v) {
                               print('hhhhhhhhhhhhhhhhhhhhhhhh\n');
                               //rint(v.length());
-                              if (v['sidemirror_left'] != null) {
+                              appData.hwjson = v;
+                              if (v['sidemirror_left'] != 0) {
                                 appData.gloleftang = v['sidemirror_left'];
                               }
-                              if (v['sidemirror_right'] != null) {
+                              if (v['sidemirror_right'] != 0) {
                                 appData.glorightang = v['sidemirror_right'];
                               }
-                              if (v['seat_depth'] != null) {
+                              if (v['seat_depth'] != 0) {
                                 appData.botdist = v['seat_depth'];
                               }
-                              if (v['seat_angle'] != null) {
+                              if (v['seat_angle'] != 0) {
                                 appData.topang = v['seat_angle'];
                               }
                               print("test1");
-                              if (v['moodlight_color'] != null) {
+                              if (v['moodlight_color'] != 0) {
                                 appData.glocol = HexColor(v['moodlight_color']);
                               }
                               print("test2");
-                              if (v['backmirror_angle'] != null) {
+                              if (v['backmirror_angle'] != 0) {
                                 appData.glorearang = v['backmirror_angle'];
                               }
                             });

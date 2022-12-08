@@ -1,8 +1,20 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert' as convert;
+import 'package:flutter/cupertino.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:centerfascia_application/variables.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:encrypt/encrypt.dart' as encr;
+
+import 'dart:math';
+import 'dart:typed_data';
+
+import "package:pointycastle/export.dart";
+
+import 'package:pointycastle/asymmetric/api.dart';
+import 'package:centerfascia_application/crypto.dart';
 
 class mqttConnection {
   static final MqttServerClient client = MqttServerClient('43.201.126.212', '');
@@ -13,6 +25,7 @@ class mqttConnection {
   static late StreamController<bool> _cameraCheckStream;
   static late StreamController<dynamic> _hwDataStream;
   static late StreamController<bool> _pinCheckStream;
+  cryptoService _crypto = cryptoService();
   /////////
   ///   1. 먼저 streamcontroller을 설정한다. 아마 json형식으로 받을경우가 많으니
   ///      StreamController<dynamic> 으로 한 뒤에 변수명 선언한다.
@@ -52,8 +65,13 @@ class mqttConnection {
   }
 
   void initialConnectionHandler(dynamic json) {
-    serverToClientTopic = '${json['topic_name']}';
-    clientToServerTopic = '${json['topic_name']}/user_command';
+    String jsonTopicName =
+        _crypto.my_decrypt(convert.base64Decode(json['topic_name']));
+
+    print("TOPIC : " + jsonTopicName);
+
+    serverToClientTopic = '$jsonTopicName';
+    clientToServerTopic = '$jsonTopicName/user_command';
     client.subscribe('${serverToClientTopic}/reply', MqttQos.atMostOnce);
     ////////////////////관우야 너꺼다
     //client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
@@ -106,6 +124,42 @@ class mqttConnection {
     _pinCheckStream = check;
     final builder = MqttClientPayloadBuilder();
     builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void hwsendRequest() {
+    final builder = MqttClientPayloadBuilder();
+    //String hwobj =
+    //    '{"seat_depth": ${appData.botdist},"seat_angle": ${appData.topang},"backmirror_angle": ${appData.glorearang},"handle_height": ${appData.glowheelheight},"sidemirror_left": ${appData.gloleftang},"sidemirror_right": ${appData.glorightang}}'; //create jsonfile of hw configs
+    Map<String, Object> hwobj = {
+      "seat_depth": appData.botdist,
+      "seat_angle": appData.topang,
+      "backmirror_angle": appData.glorearang,
+      "handle_height": appData.glowheelheight,
+      //"moodlight_color": appData.glocol,
+      "sidemirror_left": appData.gloleftang,
+      "sidemirror_right": appData.glorightang,
+    };
+    final hwjson = convert.jsonEncode(hwobj);
+    //String spit = '{"cmd_type":10,"hw_configs",hwjson}';
+    Map<String, Object> spit = {
+      "cmd_type": 10,
+      "hw_configs": hwobj,
+    }; //create cmdtype 10 json file
+    var spitjson = convert.jsonEncode(spit);
+    builder.addString(spitjson);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void turnoffRequest() {
+    final builder = MqttClientPayloadBuilder();
+    Map<String, Object> turnoff = {
+      "cmd_type": 11,
+    };
+    final turnoffjson = convert.jsonEncode(turnoff);
+    builder.addString(turnoffjson);
     client.publishMessage(
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
@@ -177,7 +231,8 @@ class mqttConnection {
   void messageHandler(String topic, String msg) {
     dynamic json = convert.jsonDecode(msg);
     print('MQTT messageHandler : $msg');
-    if (topic == 'connect/reply' && json['device_id'] == 'adcc') {
+    if (topic == 'connect/reply' &&
+        json['device_id'] == '${appData.androidID}') {
       initialConnectionHandler(json);
       return;
     }
@@ -204,7 +259,49 @@ class mqttConnection {
     }
   }
 
+  ///////////////////////////encryption keygen/////////////////////
+  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(
+      SecureRandom secureRandom,
+      {int bitLength = 2048}) {
+    // Create an RSA key generator and initialize it
+
+    final keyGen = RSAKeyGenerator()
+      ..init(ParametersWithRandom(
+          RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64),
+          secureRandom));
+
+    // Use the generator
+
+    final pair = keyGen.generateKeyPair();
+
+    // Cast the generated key pair into the RSA key types
+
+    final myPublic = pair.publicKey as RSAPublicKey;
+    final myPrivate = pair.privateKey as RSAPrivateKey;
+    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
+  }
+
+  SecureRandom exampleSecureRandom() {
+    final secureRandom = FortunaRandom();
+
+    final seedSource = Random.secure();
+    final seeds = <int>[];
+    for (int i = 0; i < 32; i++) {
+      seeds.add(seedSource.nextInt(255));
+    }
+    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+
+    return secureRandom;
+  }
+
+  ////////////////////////////////////////////////////////////
   Future<void> connect() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidtmp =
+        await deviceInfo.androidInfo; //finds device info
+    appData.androidID = androidtmp.id;
+    await _crypto.initialize();
     try {
       await client.connect();
     } on NoConnectionException catch (e) {
@@ -240,13 +337,38 @@ class mqttConnection {
       messageHandler(c[0].topic, payload);
     });
 
+    /*appData.serverpublickey = await parseKeyFromFile<RSAPublicKey>(
+        '../keyfiles/public_key.pem');*/ //get server public key
     const topic1 = 'connect/reply';
+    print("222222222222222");
     client.subscribe(topic1, MqttQos.atMostOnce);
 
     const topic2 = 'connect/request';
     final builder = MqttClientPayloadBuilder();
-    builder.addString(
-        '{"dev_type":0,"device_id":"adcc","timestamp":14141,"public_key":"3421a"}');
+    print("33333333333333333333");
+    //WidgetsFlutterBinding.ensureInitialized();
+    print(appData.androidID);
+    int timestamp = DateTime.now().millisecondsSinceEpoch; //gets timestamp
+    print("timestamp: $timestamp");
+    //appData.pair = generateRSAkeyPair(exampleSecureRandom());
+    //appData.public = appData.pair.publicKey as RSAPublicKey;
+    //appData.private = appData.pair.privateKey as RSAPrivateKey;
+    Map<String, Object> jsonObj = {
+      "dev_type": 0,
+      "device_id": appData.androidID,
+      "timestamp": timestamp,
+      "public_key": _crypto.getMyPublicKey(),
+    };
+    final json = convert.jsonEncode(jsonObj);
+    Uint8List list = _crypto.server_encrypt(json);
+    String msg = convert.base64Encode(list);
+    //String unencrypted_msg =
+    //    '{"dev_type":0,"device_id":"${appData.androidID}","timestamp":${timestamp},"public_key":"${appData.public}"}'; //create unencrypted message
+
+    //builder.addString(
+    //    '{"dev_type":0,"device_id":"${appData.androidID}","timestamp":${timestamp},"public_key":"${appData.public}"}');
+    builder.addString(msg);
     client.publishMessage(topic2, MqttQos.exactlyOnce, builder.payload!);
+    print("published");
   }
 }

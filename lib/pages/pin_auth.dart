@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:centerfascia_application/pages/google_maps.dart';
 import 'package:centerfascia_application/variables.dart';
+import 'package:crypto/crypto.dart';
 
 class pinAuth extends StatefulWidget {
   _pinAuthState createState() => _pinAuthState();
@@ -56,9 +57,11 @@ class _pinAuthState extends State<pinAuth> {
                 StreamController<bool> pincheck = StreamController<bool>();
                 mqttConnection mqtt = mqttConnection();
                 print(result.runtimeType);
-                var sender = int.parse(result);
+                String sender = sha256
+                    .convert(utf8.encode(int.parse(result).toString()))
+                    .toString();
                 //need to encrypt sender later
-                String pinmsg = '{"cmd_type":3,"pin_number":$sender}';
+                String pinmsg = '{"cmd_type":3,"pin_number":"$sender"}';
                 setState(() {
                   _authrequest = true;
                   _iscorrect = false;

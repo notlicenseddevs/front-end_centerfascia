@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:encrypt/encrypt.dart';
+import 'package:pointycastle/asymmetric/api.dart';
+
+import 'package:rsa_encrypt/rsa_encrypt.dart';
 //global variable들 저장해놓는곳
 //variables.dart import 한뒤에
 //appData.변수명 쓰면 사용 가능하다
@@ -22,12 +27,18 @@ class Appdata {
   static final _appData = new Appdata._internal();
   //초기화할것
   Color glocol = HexColor("FF42A5F5");
+  late final RSAPublicKey serverpublickey;
+  late final pair;
+  late final RSAPublicKey public;
+  late final RSAPrivateKey private;
+  late String androidID;
   var gloleftang = 30;
   var glorightang = 30;
   var glorearang = 30;
   var topang = 90;
   var botdist = 50;
   var glowheelheight = 50;
+  var hwjson;
   late dynamic facejson;
   bool pinauth = false;
   //초기화할것
