@@ -1,30 +1,66 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_api/youtube_api.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:centerfascia_application/pages/youtube_playlist/youtube_playlist_selected.dart';
 
-class YoutubePlaylist extends StatefulWidget{
+class YoutubePlaylist extends StatefulWidget {
   const YoutubePlaylist({Key? key}) : super(key: key);
 
   @override
   State<YoutubePlaylist> createState() => _YoutubePlaylistState();
 }
-class _YoutubePlaylistState extends State<YoutubePlaylist>{
+var json;
+class _YoutubePlaylistState extends State<YoutubePlaylist> {
   late String videoTitle;
+  List<dynamic>? urllist = [];
+  late List<String> imgurl = [];
+  late List<String> playlistname =[];
+  late List<String> playlistfirstsong =[];
+
+
+  final List<String> playlistUrl = [
+    'PLaPiTr4kM_as6id1T0twAY5S5xt8-B_q6',
+    'PL6dFf0WniYfKIF9GVcLyiOCrz_u5Ulq62',
+    'PLpF9ZVTtb3m6jjmGShxr6tGiXzZ3RSTni',
+  ];
   final List<String> _videoUrlList = [
     'https://youtu.be/dWs3dzj4Wng',
     'https://www.youtube.com/watch?v=668nUCeBHyY',
     'https://youtu.be/S3npWREXr8s',
+    'https://www.youtube.com/watch?v=90huos_0lVw',
   ];
+
+  final List<String> _videoUrlListTmp = [
+    'https://www.youtube.com/watch?v=u6HihlihBp0',
+    'https://www.youtube.com/watch?v=pDqsXkfc8_0',
+    'https://www.youtube.com/watch?v=K6BRna4_bmg',
+    'https://www.youtube.com/watch?v=7rFtdZv4AZY',
+    'https://youtu.be/qlcgPoI6h48',
+    'https://youtu.be/POYLCr17a-o',
+  ];
+  late int currVideoNum = 0;
+
   @override
-  void initState() {
+  Future<void> initState() async {
+
+    await getPlaylist();
     super.initState();
-    fillYTlists();
+    fillYTlists(_videoUrlList);
   }
-  List <YoutubePlayerController> lYTC = [];
+
+  Future<void> getPlaylist() async{
+    for(int k=0;k<playlistUrl.length;k++){
+      await fetchVideos(playlistUrl[k], 20);
+    }
+  }
+
+  List<YoutubePlayerController> lYTC = [];
 
   Map<String, dynamic> cStates = {};
 
-  fillYTlists(){
+  fillYTlists(List<String> _videoUrlList) {
+    lYTC.clear();
+    cStates.clear();
     for (var element in _videoUrlList) {
       String _id = YoutubePlayer.convertUrlToId(element)!;
       YoutubePlayerController _ytController = YoutubePlayerController(
@@ -50,7 +86,7 @@ class _YoutubePlaylistState extends State<YoutubePlaylist>{
       lYTC.add(_ytController);
     }
   }
-
+  late List<YoutubePlayer> YoutubePlayerList;
   @override
   void dispose() {
     for (var element in lYTC) {
@@ -59,81 +95,86 @@ class _YoutubePlaylistState extends State<YoutubePlaylist>{
     super.dispose();
   }
 
+  void changeCurrentPlaylist(){
+    print("handle tap events\n");
+    for (int k = 0; k < lYTC.length; k++) {
+      final id = YoutubePlayer.convertUrlToId(_videoUrlListTmp[k]);
+      lYTC[k].load(id!, startAt: 0);
+    }
+    for(int k = lYTC.length; k < _videoUrlListTmp.length; k++){
+
+    }
+    YoutubePlaylistSelected(cStates, lYTC, _videoUrlList);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Youtube Playlist'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.menu_outlined),
-          )
+      body: Row(
+        children: [
+          Container(
+            alignment: Alignment.topRight,
+            width: 480.0,
+            child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ListView.builder(
+                    itemCount: playlistUrl.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index)  {
+                      print("<json test print>\n");
+                      print(jsonResponse);
+
+                      //imgurl.add(jsonResponse[index]['items'][0]['snippet']['thumbnails']['high']['url']);
+                      print("<CP1>");
+                      //playlistname.add(jsonResponse[index]['items'][0]['snippet']['playlistId']);
+                      print("<CP2>");
+                      //playlistfirstsong.add(jsonResponse[index]['items'][0]['snippet']['resourceId']['videoId']);
+                      print("<CP3>");
+                      return Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Stack(children: [
+                          Container(
+                            height: 100.0,
+                            width: 440.0,
+                            decoration: const BoxDecoration(
+                              color: Color(0xfff5f5f5),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                            ),
+                            child: InkWell(
+
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  //Image.network('${imgurl[index]}'),
+                                  Column(
+                                    children: [
+                                      //Text("${playlistname[index]}",
+                                      //style: TextStyle(color: Colors.blue)),
+                                      //Text("${playlistfirstsong[index]}"),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                              onTap: () {
+                                setState(() {
+                                  //changeCurrentPlaylist();
+                                  _videoUrlList.clear();
+                                  for(int s = 0 ; s < _videoUrlListTmp.length ; s ++){
+                                    _videoUrlList.add(_videoUrlListTmp[s]);
+                                  }
+                                  fillYTlists(_videoUrlList);
+                                });
+                              },
+                            ),
+                          ),
+                        ]),
+                      );
+                    })),
+          ),
+          YoutubePlaylistSelected(cStates, lYTC, _videoUrlList),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: ListView.builder(
-          itemCount: _videoUrlList.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            YoutubePlayerController _ytController = lYTC[index];
-            String _id = YoutubePlayer.convertUrlToId(_videoUrlList[index])!;
-            String curState = 'undefined';
-            if (cStates[_id] != null) {
-              curState = cStates[_id]? 'playing':'paused';
-            }
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Container(
-                    height: 220.0,
-                    decoration: const BoxDecoration(
-                      color: Color(0xfff5f5f5),
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                    ),
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.all(Radius.circular(12)),
-                      child: YoutubePlayer(
-                        controller: _ytController,
-                        showVideoProgressIndicator: true,
-                        progressIndicatorColor: Colors.lightBlueAccent,
-                        bottomActions: [
-                          CurrentPosition(),
-                          ProgressBar(isExpanded: true),
-                          FullScreenButton(),
-                        ],
-                        onReady: (){
-                          print('onReady for $index');
-                        },
-                        onEnded: (YoutubeMetaData _md) {
-                          _ytController.seekTo(const Duration(seconds: 0));
-                        },
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      borderRadius: const BorderRadius.only(
-                        bottomRight: Radius.circular(12),
-                        bottomLeft: Radius.circular(12),
-                      ),
-                    ),
-                    child: Text(curState, textScaleFactor: 1.5,),
-                  )
-                ],
-              ),
-            );
-          },
-        ),
       ),
     );
   }
 }
-
-

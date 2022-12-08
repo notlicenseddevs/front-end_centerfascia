@@ -1,12 +1,9 @@
-//import 'dart:html';
-
 import 'dart:async';
-import 'package:centerfascia_application/variables.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:centerfascia_application/services/google_map_service.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({Key? key}) : super(key: key);
@@ -29,19 +26,15 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   static const List<List<String>> productList = [
     ['집', '10', '20', 'www.naver.com'],
-    ['학교', '20', '30', 'www.google.com'],
+    ['학교', '37.5509442', '126.9410023', 'www.sogang.ac.kr'],
     ['맛집', '30', '40', 'www.daum.com'],
-    ['최가 돈까스', '37.3689003', '127.1064754', 'www.daum.com'],
-    ['찰리스 버거', '37.3686529', '127.1122212', 'www.daum.com'],
+    ['최가 돈까스', '37.3689003', '127.1064754', 'null'],
+    ['찰리스 버거', '37.3686529', '127.1122212', 'null'],
     ['다이호시', '37.384143', '127.1116396', 'www.daum.com'],
-    ['맛집', '90', '10', 'www.daum.com'],
-    ['맛집', '100', '20', 'www.daum.com'],
-    ['종점', '40', '50', 'www.bing.com']
   ];
 
   @override
   void initState() {
-    appData.imdone = 1;
     super.initState();
     _markers.add(Marker(
       markerId: MarkerId('myInitialPosition'),
@@ -64,16 +57,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
     });
   }
 
-  Future<Position> getUserCurrentLocation() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) async {
-      await Geolocator.requestPermission();
-      print("ERROR" + error.toString());
-    });
-    return await Geolocator.getCurrentPosition();
-  }
-
   void _createMarker(
       String markerID, double lat, double lng, String url) async {
     var marker_loc = LatLng(lat, lng);
@@ -83,18 +66,34 @@ class _GoogleMapsState extends State<GoogleMaps> {
         zoom: 14,
       );
       mapController
-          .moveCamera(CameraUpdate.newCameraPosition(_initialCameraPostion));
+          .animateCamera(CameraUpdate.newCameraPosition(_initialCameraPostion));
       var _origin = Marker(
         markerId: MarkerId(markerID),
         position: marker_loc,
+        onTap: () {
+          _gotoSpace(marker_loc);
+        },
         infoWindow: InfoWindow(title: markerID),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
       );
       _markers.clear();
       _markers.add(_origin);
     });
   }
 
-  void _gotoSpace() {
+  void submit(){
+    _fbKey.currentState?.save();
+    final inputValues = _fbKey.currentState?.value;
+    final id = inputValues!['place'];
+    print(id);
+    // 중복 체크 함수 here //
+
+    final placeId = loadEvs(1.0, 1.0);
+
+
+    Navigator.of(context).pop();
+  }
+  void _gotoSpace(LatLng marker_loc) {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -131,9 +130,19 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text("test text 1"),
-                                      Text("test text 2"),
-                                      Text("test text 3"),
+                                      Text("장소를 입력해주세요"),
+                                      FormBuilderTextField(name: 'place',
+                                        initialValue: "장소 이름",
+
+                                      ),
+                                      MaterialButton(
+                                        child:Text("SUBMIT"),
+                                        color: Colors.blue,
+                                        textColor: Colors.white,
+                                        onPressed:(){
+                                          submit();
+                                        }
+                                      )
                                     ]),
                               ),
                             ))
@@ -143,21 +152,15 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
   //mapcreated
   void _onMapCreated(GoogleMapController controller) {
-    mapController =
-        controller; /*
-    _location.onLocationChanged.listen((l) {
-      l.latitude;
-        mapController.animateCamera(
-          CameraUpdate.newCameraPosition(
-            CameraPosition(target: LatLng(l.latitude!, l.longitude!), zoom:15),
-          ),
-        );
-    });*/
+    mapController = controller;
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(onPressed: () async {
+        backgroundColor: Colors.black12,
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.home),
+            onPressed: () async {
           getUserCurrentLocation().then((value) async {
             print(value.latitude.toString() + " " + value.longitude.toString());
             _createMarker("Current Location", value.latitude, value.longitude,
@@ -174,6 +177,10 @@ class _GoogleMapsState extends State<GoogleMaps> {
                   // 메인 구글 맵스 표시
                   onCameraIdle: () {},
                   onCameraMoveStarted: () {},
+                  onTap: (currloc) {
+                    _createMarker(
+                        "현재위치", currloc.latitude, currloc.longitude, "");
+                  },
                   myLocationButtonEnabled: true,
                   myLocationEnabled: true,
                   mapType: MapType.normal,
@@ -208,16 +215,32 @@ class _GoogleMapsState extends State<GoogleMaps> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(productList[index][0]),
+                              Text(
+                                productList[index][0],
+                                style: TextStyle(
+                                  color: Colors.blue,
+                                ),
+                              ),
                               Text(
                                 "Lat : ${productList[index][1]} / Lng : ${productList[index][2]}",
                                 textScaleFactor: 0.7,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                               Text(
-                                "경기도 서울시 캘리포니아구 뉴욕동 지하2층 벙커 302호",
+                                "서울특별시 마포구 백범로 35",
                                 textScaleFactor: 0.8,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
-                              Text(productList[index][3]),
+                              Text(
+                                productList[index][3],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
                             ])),
                   );
                 },
