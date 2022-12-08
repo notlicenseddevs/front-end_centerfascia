@@ -53,12 +53,12 @@ class _HW_handleState extends State<HW_handle> {
                   onTapUp: (TapUpDetails details) {
                     //print('up');
                     _timer.cancel();
-                    appData.botdist = _botdist;
+                    appData.glowheelheight = _botdist;
                   },
                   onTapCancel: () {
                     //print('cancel');
                     _timer.cancel();
-                    appData.botdist = _botdist;
+                    appData.glowheelheight = _botdist;
                   },
                 ),
                 Text("높이 조절",
@@ -90,12 +90,12 @@ class _HW_handleState extends State<HW_handle> {
                   onTapUp: (TapUpDetails details) {
                     //print('up');
                     _timer.cancel();
-                    appData.botdist = _botdist;
+                    appData.glowheelheight = _botdist;
                   },
                   onTapCancel: () {
                     // print('cancel');
                     _timer.cancel();
-                    appData.botdist = _botdist;
+                    appData.glowheelheight = _botdist;
                   },
                 ),
               ],
