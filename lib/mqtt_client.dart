@@ -1,8 +1,19 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert' as convert;
+import 'package:encrypt/encrypt_io.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:centerfascia_application/variables.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:encrypt/encrypt.dart' as encr;
+
+import 'dart:math';
+import 'dart:typed_data';
+
+import "package:pointycastle/export.dart";
+
+import 'package:pointycastle/asymmetric/api.dart';
 
 class mqttConnection {
   static final MqttServerClient client = MqttServerClient('43.201.126.212', '');
@@ -177,7 +188,8 @@ class mqttConnection {
   void messageHandler(String topic, String msg) {
     dynamic json = convert.jsonDecode(msg);
     print('MQTT messageHandler : $msg');
-    if (topic == 'connect/reply' && json['device_id'] == 'adcc') {
+    if (topic == 'connect/reply' &&
+        json['device_id'] == '${appData.androidInfo}') {
       initialConnectionHandler(json);
       return;
     }
@@ -204,6 +216,42 @@ class mqttConnection {
     }
   }
 
+  ///////////////////////////encryption keygen/////////////////////
+  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAkeyPair(
+      SecureRandom secureRandom,
+      {int bitLength = 2048}) {
+    // Create an RSA key generator and initialize it
+
+    final keyGen = RSAKeyGenerator()
+      ..init(ParametersWithRandom(
+          RSAKeyGeneratorParameters(BigInt.parse('65537'), bitLength, 64),
+          secureRandom));
+
+    // Use the generator
+
+    final pair = keyGen.generateKeyPair();
+
+    // Cast the generated key pair into the RSA key types
+
+    final myPublic = pair.publicKey as RSAPublicKey;
+    final myPrivate = pair.privateKey as RSAPrivateKey;
+    return AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>(myPublic, myPrivate);
+  }
+
+  SecureRandom exampleSecureRandom() {
+    final secureRandom = FortunaRandom();
+
+    final seedSource = Random.secure();
+    final seeds = <int>[];
+    for (int i = 0; i < 32; i++) {
+      seeds.add(seedSource.nextInt(255));
+    }
+    secureRandom.seed(KeyParameter(Uint8List.fromList(seeds)));
+
+    return secureRandom;
+  }
+
+  ////////////////////////////////////////////////////////////
   Future<void> connect() async {
     try {
       await client.connect();
@@ -240,13 +288,28 @@ class mqttConnection {
       messageHandler(c[0].topic, payload);
     });
 
+    /*appData.serverpublickey = await parseKeyFromFile<RSAPublicKey>(
+        'keyfiles/public_key.pem'); //get server public key*/
     const topic1 = 'connect/reply';
     client.subscribe(topic1, MqttQos.atMostOnce);
 
     const topic2 = 'connect/request';
     final builder = MqttClientPayloadBuilder();
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    appData.androidInfo = await deviceInfo.androidInfo; //finds device info
+    int timestamp = DateTime.now().millisecondsSinceEpoch; //gets timestamp
+    appData.pair = generateRSAkeyPair(exampleSecureRandom());
+    appData.public = appData.pair.publickey;
+    appData.private = appData.pair.privateKey;
+    String unencrypted_msg =
+        '{"dev_type":0,"device_id":"${appData.androidInfo}","timestamp":${timestamp},"public_key":"${appData.public}"}'; //create unencrypted message
+    final encrypter = encr.Encrypter(
+        encr.RSA(publicKey: appData.public, privateKey: appData.private));
+    var encrypted = encrypter.encrypt(unencrypted_msg);
+    print(encrypted);
+
     builder.addString(
-        '{"dev_type":0,"device_id":"adcc","timestamp":14141,"public_key":"3421a"}');
+        '{"dev_type":0,"device_id":"${appData.androidInfo}","timestamp":${timestamp},"public_key":"${appData.public}"}');
     client.publishMessage(topic2, MqttQos.exactlyOnce, builder.payload!);
   }
 }
