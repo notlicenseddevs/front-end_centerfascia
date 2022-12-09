@@ -33,6 +33,14 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
     'https://www.youtube.com/watch?v=90huos_0lVw',
   ];
 
+  final List<String> _videoUrlListTmp = [
+    'https://www.youtube.com/watch?v=u6HihlihBp0',
+    'https://www.youtube.com/watch?v=pDqsXkfc8_0',
+    'https://www.youtube.com/watch?v=K6BRna4_bmg',
+    'https://www.youtube.com/watch?v=7rFtdZv4AZY',
+    'https://youtu.be/qlcgPoI6h48',
+    'https://youtu.be/POYLCr17a-o',
+  ];
   late int currVideoNum = 0;
 
   @override
@@ -48,7 +56,7 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
   }
 
   List<YoutubePlayerController> lYTC = [];
-  YoutubePlayerController? _YoutubeController;
+
   Map<String, dynamic> cStates = {};
 
   fillYTlists(List<String> _videoUrlList) {
@@ -67,13 +75,14 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
 
       _ytController.addListener(() {
         print('for $_id got isPlaying state ${_ytController.value.isPlaying}');
+        if (cStates[_id] != _ytController.value.isPlaying) {
         if (mounted) {
           setState(() {
             cStates[_id] = _ytController.value.isPlaying;
             _ytController.load(_id, startAt: 0);
           });
         }
-      });
+      }});
 
       lYTC.add(_ytController);
     }
@@ -85,6 +94,18 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
       element.dispose();
     }
     super.dispose();
+  }
+
+  void changeCurrentPlaylist(){
+    print("handle tap events\n");
+    for (int k = 0; k < lYTC.length; k++) {
+      final id = YoutubePlayer.convertUrlToId(_videoUrlListTmp[k]);
+      lYTC[k].load(id!, startAt: 0);
+    }
+    for(int k = lYTC.length; k < _videoUrlListTmp.length; k++){
+
+    }
+    YoutubePlaylistSelected(cStates, lYTC, _videoUrlList);
   }
 
   @override

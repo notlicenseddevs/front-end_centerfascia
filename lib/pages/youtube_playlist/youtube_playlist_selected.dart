@@ -44,9 +44,6 @@ Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
       future: _future(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
 
-      if(snapshot.hasData == false){
-        return CircularProgressIndicator();
-      }else {
         return Column(
           children: [
             Padding(
@@ -159,7 +156,6 @@ Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
             ),
           ],
         );
-      }
       },
     ),
   );
