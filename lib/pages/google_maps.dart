@@ -25,9 +25,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
   Location _location = Location();
 
   static const List<List<String>> productList = [
-    ['집', '10', '20', 'www.naver.com'],
+
     ['학교', '37.5509442', '126.9410023', 'www.sogang.ac.kr'],
-    ['맛집', '30', '40', 'www.daum.com'],
     ['최가 돈까스', '37.3689003', '127.1064754', 'null'],
     ['찰리스 버거', '37.3686529', '127.1122212', 'null'],
     ['다이호시', '37.384143', '127.1116396', 'www.daum.com'],
