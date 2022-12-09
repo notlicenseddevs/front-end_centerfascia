@@ -180,6 +180,9 @@ class mqttConnection {
       print("I AM HERE ");
       print(json['succeed'].runtimeType);
       bool isSuceed = json['succeed'];
+      if (isSuceed == true) {
+        appData.user_id = json['user_id'];
+      }
       _cameraCheckStream.add(isSuceed);
     }
     if (request_type == 2) {

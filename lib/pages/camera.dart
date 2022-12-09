@@ -7,6 +7,7 @@ import 'package:centerfascia_application/variables.dart';
 import 'package:centerfascia_application/mqtt_client.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:camera/camera.dart';
 
@@ -106,6 +107,14 @@ class _CameraAuthState extends State<CameraAuth> {
                           _iscorrect = v;
                           _iswrong = !v;
                           if (!_authrequest && _iscorrect && !_iswrong) {
+                            Fluttertoast.showToast(
+                              msg: "반갑습니다 ${appData.user_id}님",
+                              toastLength: Toast.LENGTH_LONG,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                             //여기다가 hw정보 받고 push 해주자
                             //json 길이가 0이면 걍 default (이미 설정해놓음)
                             StreamController<dynamic> hwdata =

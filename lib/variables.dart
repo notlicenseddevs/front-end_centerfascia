@@ -27,6 +27,7 @@ class Appdata {
   static final _appData = new Appdata._internal();
   //초기화할것
   Color glocol = HexColor("FF42A5F5");
+  String user_id = '';
   late final RSAPublicKey serverpublickey;
   late final pair;
   late final RSAPublicKey public;

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:centerfascia_application/pages/google_maps.dart';
 import 'package:centerfascia_application/variables.dart';
+import 'home.dart';
 import 'package:crypto/crypto.dart';
 
 class pinAuth extends StatefulWidget {
@@ -30,6 +31,10 @@ class _pinAuthState extends State<pinAuth> {
 
   @override
   Widget build(BuildContext context) {
+    /*if (appData.pinauth == true) {
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+    }*/
+    ;
     return Scaffold(
         backgroundColor: Colors.grey[850],
         body: ListView(
