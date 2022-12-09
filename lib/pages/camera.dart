@@ -64,10 +64,12 @@ class _CameraAuthState extends State<CameraAuth> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[850],
       body: Container(
-          child: Row(children: [
+          child:
+              Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
         Container(
-            height: 500,
+            height: 450,
             width: 600,
             child: controller == null
                 ? Center(child: Text("Loading Camera..."))
