@@ -33,6 +33,7 @@ class Appdata {
   late final RSAPublicKey public;
   late final RSAPrivateKey private;
   late String androidID;
+  var imdone = 0;
   var gloleftang = 30;
   var glorightang = 30;
   var glorearang = 30;

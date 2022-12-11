@@ -81,6 +81,8 @@ class _CameraAuthState extends State<CameraAuth> {
                         child: CircularProgressIndicator(),
                       )
                     : CameraPreview(controller!)),
+
+        camauthResult(),
         ElevatedButton.icon(
           //image capture button
           onPressed: () async {
@@ -164,7 +166,14 @@ class _CameraAuthState extends State<CameraAuth> {
                                     builder: (context) => Home()));
                           } else {
                             //couldnt find user
-
+                            Fluttertoast.showToast(
+                              msg: "사용자인식을 하지 못했습니다. 다시 찍어주세요",
+                              toastLength: Toast.LENGTH_LONG,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                           }
                         }),
                       });
@@ -177,7 +186,6 @@ class _CameraAuthState extends State<CameraAuth> {
           icon: Icon(Icons.camera),
           label: Text("Capture"),
         ),
-        camauthResult(),
       ])),
     );
   }
@@ -190,10 +198,10 @@ class _CameraAuthState extends State<CameraAuth> {
       return const Text('');
     }
     if (!_authrequest && _iscorrect && !_iswrong) {
-      return const Text('User authorized');
+      //return const Text('User authorized');
     }
     if (!_authrequest && !_iscorrect && _iswrong) {
-      return const Text('FACE AUTH ERROR');
+      //return const Text('FACE AUTH ERROR');
     }
     return const Text('');
   }

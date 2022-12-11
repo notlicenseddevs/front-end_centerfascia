@@ -98,6 +98,9 @@ flutter:
     - keyfiles/public_key.pem
     - image/LOGO.png
     - image/LOGO256.png
+    - image/car_pic.png
+    - image/google_maps.png
+    - image/youtube_logo.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
