@@ -17,7 +17,10 @@ import 'package:pointycastle/asymmetric/api.dart';
 import 'package:centerfascia_application/crypto.dart';
 
 class mqttConnection {
-  static final MqttServerClient client = MqttServerClient('43.201.126.212', '');
+  static final MqttServerClient client =
+      MqttServerClient.withPort('34.64.86.97', '', 1883);
+  //static final MqttServerClient client =
+  //    MqttServerClient.withPort('43.201.126.212', '', 1884);
   static late final String clientToServerTopic;
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
@@ -41,6 +44,7 @@ class mqttConnection {
     client.onDisconnected = onDisconnected;
     client.onConnected = onConnected;
     client.onSubscribed = onSubscribed;
+    /////////////
   }
 
   void onDisconnected() {
@@ -132,12 +136,13 @@ class mqttConnection {
     final builder = MqttClientPayloadBuilder();
     //String hwobj =
     //    '{"seat_depth": ${appData.botdist},"seat_angle": ${appData.topang},"backmirror_angle": ${appData.glorearang},"handle_height": ${appData.glowheelheight},"sidemirror_left": ${appData.gloleftang},"sidemirror_right": ${appData.glorightang}}'; //create jsonfile of hw configs
+
     Map<String, Object> hwobj = {
       "seat_depth": appData.botdist,
       "seat_angle": appData.topang,
       "backmirror_angle": appData.glorearang,
       "handle_height": appData.glowheelheight,
-      //"moodlight_color": appData.glocol,
+      "moodlight_color": "${appData.glocol}",
       "sidemirror_left": appData.gloleftang,
       "sidemirror_right": appData.glorightang,
     };
@@ -149,12 +154,15 @@ class mqttConnection {
     }; //create cmdtype 10 json file
     var spitjson = convert.jsonEncode(spit);
     builder.addString(spitjson);
+    print("SENDING HARDWARE INFO");
+    print(spitjson);
     client.publishMessage(
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
   void turnoffRequest() {
     final builder = MqttClientPayloadBuilder();
+    print("TURNING OFF");
     Map<String, Object> turnoff = {
       "cmd_type": 11,
     };
@@ -180,6 +188,9 @@ class mqttConnection {
       print("I AM HERE ");
       print(json['succeed'].runtimeType);
       bool isSuceed = json['succeed'];
+      if (isSuceed == true) {
+        appData.user_id = json['user_id'];
+      }
       _cameraCheckStream.add(isSuceed);
     }
     if (request_type == 2) {
@@ -298,11 +309,14 @@ class mqttConnection {
   Future<void> connect() async {
     WidgetsFlutterBinding.ensureInitialized();
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    ////////////////////
+    /////////////////////////////
     AndroidDeviceInfo androidtmp =
         await deviceInfo.androidInfo; //finds device info
     appData.androidID = androidtmp.id;
     await _crypto.initialize();
     try {
+      client.keepAlivePeriod = 10000;
       await client.connect();
     } on NoConnectionException catch (e) {
       // Raised by the client when connection fails.

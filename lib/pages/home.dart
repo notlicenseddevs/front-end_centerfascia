@@ -43,6 +43,7 @@ class _HomeState extends State<Home> {
                     //child: Column(children: [
                     //Image.asset('image/car_pic.png'),
                     child: Text("LOG\nOUT"),
+                    //child: Text("${appData.user_id}"),
                     //])
                   ),
                 ),

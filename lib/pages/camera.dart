@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,7 +8,7 @@ import 'package:centerfascia_application/variables.dart';
 import 'package:centerfascia_application/mqtt_client.dart';
 import 'dart:async';
 import 'dart:convert';
-
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:camera/camera.dart';
 
 class CameraAuth extends StatefulWidget {
@@ -62,12 +63,17 @@ class _CameraAuthState extends State<CameraAuth> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
     return Scaffold(
+      backgroundColor: Colors.grey[850],
       body: Container(
-          child: Row(children: [
+          child: Stack(alignment: Alignment.bottomCenter, children: [
+        //Spacer(flex: 5),
         Container(
-            height: 500,
-            width: 600,
+            //alignment: Alignment(0.0, 0.0),
+            height: 1200,
+            width: 1920,
             child: controller == null
                 ? Center(child: Text("Loading Camera..."))
                 : !controller!.value.isInitialized
@@ -106,6 +112,14 @@ class _CameraAuthState extends State<CameraAuth> {
                           _iscorrect = v;
                           _iswrong = !v;
                           if (!_authrequest && _iscorrect && !_iswrong) {
+                            Fluttertoast.showToast(
+                              msg: "반갑습니다 ${appData.user_id}님",
+                              toastLength: Toast.LENGTH_LONG,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                             //여기다가 hw정보 받고 push 해주자
                             //json 길이가 0이면 걍 default (이미 설정해놓음)
                             StreamController<dynamic> hwdata =
@@ -129,8 +143,15 @@ class _CameraAuthState extends State<CameraAuth> {
                                 appData.topang = v['seat_angle'];
                               }
                               print("test1");
-                              if (v['moodlight_color'] != 0) {
-                                appData.glocol = HexColor(v['moodlight_color']);
+                              if (v['moodlight_color'].length == 17 &&
+                                  v['moodlight_color'].length != 0) {
+                                int tmp;
+                                String tmpstr;
+                                tmpstr = v['moodlight_color']
+                                    .split('(0x')[1]
+                                    .split(')')[0];
+                                tmp = int.parse(tmpstr, radix: 16);
+                                appData.glocol = new Color(tmp);
                               }
                               print("test2");
                               if (v['backmirror_angle'] != 0) {
@@ -141,6 +162,9 @@ class _CameraAuthState extends State<CameraAuth> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => Home()));
+                          } else {
+                            //couldnt find user
+
                           }
                         }),
                       });
