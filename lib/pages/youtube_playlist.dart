@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:youtube_api/youtube_api.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:centerfascia_application/pages/youtube_playlist/youtube_playlist_selected.dart';
+import 'package:centerfascia_application/variables.dart';
 
+// todo 새로고침을 시키는 함수를 정의(MQTT와 별개 , json을 받으면 playlist를 새로 만들어주는)
 class YoutubePlaylist extends StatefulWidget {
   const YoutubePlaylist({Key? key}) : super(key: key);
 
@@ -12,47 +13,47 @@ class YoutubePlaylist extends StatefulWidget {
 var json;
 class _YoutubePlaylistState extends State<YoutubePlaylist> {
   late String videoTitle;
-  List<dynamic>? urllist = [];
 
-
-  final List<String> playlistUrl = [
-    'PLaPiTr4kM_as6id1T0twAY5S5xt8-B_q6',
-    'PL6dFf0WniYfKIF9GVcLyiOCrz_u5Ulq62',
-    'PLpF9ZVTtb3m6jjmGShxr6tGiXzZ3RSTni',
-  ];
-
-  final List<String> playlistTitle = [
-    '기분이 좋아지는 플레이리스트',
-    '편안하게 들을 수 있는 플레이리스트',
-    '드라이브할 때 듣는 신나는 플레이리스트',
-  ];
   final List<String> _videoUrlList = [
-    'https://youtu.be/dWs3dzj4Wng',
+    'https://www.youtube.com/watch?v=ot_RXb9XJnU',
     'https://www.youtube.com/watch?v=668nUCeBHyY',
     'https://youtu.be/S3npWREXr8s',
     'https://www.youtube.com/watch?v=90huos_0lVw',
-  ];
-
-  final List<String> _videoUrlListTmp = [
-    'https://www.youtube.com/watch?v=u6HihlihBp0',
-    'https://www.youtube.com/watch?v=pDqsXkfc8_0',
-    'https://www.youtube.com/watch?v=K6BRna4_bmg',
-    'https://www.youtube.com/watch?v=7rFtdZv4AZY',
-    'https://youtu.be/qlcgPoI6h48',
-    'https://youtu.be/POYLCr17a-o',
   ];
   late int currVideoNum = 0;
 
   @override
   void initState()  {
-
     getPlaylist();
     super.initState();
     fillYTlists(_videoUrlList);
   }
 
-  void getPlaylist(){
-    fetchVideos(playlistUrl[0], 20);
+  void getPlaylist() async{
+    print(YoutubePlayer.convertUrlToId(appData.playlist[0]['url']!).toString());
+    await fetchVideos(appData.playlist[0]['url']?.substring(34), 20);
+    print("#TEST : appData");
+    print(appData.playlist);
+    print("#TEST : _id");
+    print(appData.playlist[0]['url']?.substring(34));
+    print("#TEST : response");
+    print(jsonResponse);
+    for(int s = 0 ; s < 20 ; s ++){
+      _videoUrlList.add("https://youtu.be/${jsonResponse['items'][s]['snippet']['resourceId']['videoId']}");
+    }
+  }
+  void abcd(int index) async{
+    await fetchVideos(appData.playlist[index]['url']?.substring(34), 20);
+    print("<<<< index : $index >>>>>>>");
+    _videoUrlList.clear();
+    for(int s = 0 ; s < 20 ; s ++){
+      _videoUrlList.add("https://youtu.be/${jsonResponse['items'][s]['snippet']['resourceId']['videoId']}");
+    }
+    print(_videoUrlList);
+    print(YoutubePlayer.convertUrlToId(_videoUrlList[0]));
+    lYTC[0].load(YoutubePlayer.convertUrlToId(_videoUrlList[0])!, startAt: 0);
+    fillYTlists(_videoUrlList);
+    print(lYTC[0].initialVideoId);
   }
 
   List<YoutubePlayerController> lYTC = [];
@@ -79,7 +80,6 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
         if (mounted) {
           setState(() {
             cStates[_id] = _ytController.value.isPlaying;
-            _ytController.load(_id, startAt: 0);
           });
         }
       }});
@@ -96,18 +96,6 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
     super.dispose();
   }
 
-  void changeCurrentPlaylist(){
-    print("handle tap events\n");
-    for (int k = 0; k < lYTC.length; k++) {
-      final id = YoutubePlayer.convertUrlToId(_videoUrlListTmp[k]);
-      lYTC[k].load(id!, startAt: 0);
-    }
-    for(int k = lYTC.length; k < _videoUrlListTmp.length; k++){
-
-    }
-    YoutubePlaylistSelected(cStates, lYTC, _videoUrlList);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -120,7 +108,7 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
             child: Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: ListView.builder(
-                    itemCount: playlistUrl.length,
+                    itemCount: appData.playlist.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index)  {
                       return Padding(
@@ -136,50 +124,56 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                             ),
                             child: InkWell(
 
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  //Image.network('${imgurl[index]}'),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(9.0),
-                                        child: Text("${playlistTitle[index]}",
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(color: Colors.blue,
-                                            fontSize: 17.0)),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                        child: Text("유튜브 재생목록",
+                              child: Container(
+                                width:430.0,
+                                height: 100.0,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    //Image.network('${imgurl[index]}'),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.all(9.0),
+                                          child: Text("${appData.playlist[index]['name']}",
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
                                             textAlign: TextAlign.start,
-                                            style: TextStyle(color: Colors.white54,
-                                                fontSize: 15.0)),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                        child: Text("www.youtube.com/list=${playlistUrl[index]}",
-                                          textAlign: TextAlign.start,
-                                          style: TextStyle(color: Colors.white12,
-                                              fontSize: 13.0)),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                                            style: TextStyle(color: Colors.blue,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 17.0)),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                          child: Text("유튜브 재생목록",
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(color: Colors.white54,
+                                                  fontSize: 15.0)),
+                                        ),
+                                        Container(
+                                          width: 430.0,
+                                          child: Padding(
+                                            padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                            child: Text("${appData.playlist[index]['url']}",
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(color: Colors.white12,
+                                                  fontSize: 13.0)),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ),
 
                               onTap: () {
                                 setState(() {
-                                  fetchVideos(playlistUrl[index], 20);
-                                  print("<<<< index : $index >>>>>>>");
-                                  _videoUrlList.clear();
-                                  for(int s = 0 ; s < 20 ; s ++){
-                                    _videoUrlList.add("https://youtu.be/${jsonResponse['items'][s]['snippet']['resourceId']['videoId']}");
-                                  }
-                                  print(_videoUrlList);
-                                  fillYTlists(_videoUrlList);
-
+                                  abcd(index);
                                 });
                               },
                             ),

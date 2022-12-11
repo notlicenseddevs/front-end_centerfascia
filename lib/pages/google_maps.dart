@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'package:centerfascia_application/mqtt_client.dart';
 import 'package:flutter/material.dart';
+import 'package:get/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:centerfascia_application/services/google_map_service.dart';
+import 'package:centerfascia_application/variables.dart';
 
 class GoogleMaps extends StatefulWidget {
   const GoogleMaps({Key? key}) : super(key: key);
@@ -14,23 +17,14 @@ class GoogleMaps extends StatefulWidget {
 
 class _GoogleMapsState extends State<GoogleMaps> {
   late GoogleMapController mapController;
-  //init state, sogang_university
-  final LatLng _center = const LatLng(37.556909, 126.9378836);
-
   GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
   CameraPosition _initialCameraPostion = CameraPosition(
     target: LatLng(37.382782, 127.1189054),
     zoom: 14,
   );
   Location _location = Location();
-
-  static const List<List<String>> productList = [
-
-    ['학교', '37.5509442', '126.9410023', 'www.sogang.ac.kr'],
-    ['최가 돈까스', '37.3689003', '127.1064754', 'null'],
-    ['찰리스 버거', '37.3686529', '127.1122212', 'null'],
-    ['다이호시', '37.384143', '127.1116396', 'www.daum.com'],
-  ];
+  mqttConnection mqtt = mqttConnection();
+  bool _loading = false;
 
   @override
   void initState() {
@@ -40,6 +34,38 @@ class _GoogleMapsState extends State<GoogleMaps> {
       position: LatLng(37.382782, 127.1189054),
       infoWindow: InfoWindow(title: 'My Position', snippet: 'Where am I?'),
     ));
+    loadData(true);
+
+  }
+  void loadData(bool doRefresh){
+    String id;
+    String place_name;
+    double latitude;
+    double longitude;
+    String gmap_link;
+    String describe;
+    StreamController<dynamic> pdata = StreamController();
+    String prequest = '{"cmd_type":4, "refresh_target":2}';
+    if(doRefresh) {
+      mqtt.placeRequest(prequest, pdata);
+    }
+    setState(() {});
+    pdata.stream.listen((v){
+      print('GoogleMaps listen Started');
+      print(v);
+      for(int k=0;k<v.length;k++){
+        id = v[k]['_id'];
+        place_name = v[k]['place_name']!=null ? v[k]['place_name'] : 'NONE';
+        latitude = v[k]['latitude']!=null? v[k]['latitude'] : 0;
+        longitude = v[k]['longitude']!=null ? v[k]['longitude'] : 0;
+        gmap_link = v[k]['gmap_link']!=null ? v[k]['gmap_link'] : 'NONE';
+        describe = v[k]['describe']!=null ? v[k]['describe'] : 'NONE';
+        appData.places.add({'_id':id, 'describe':describe, 'latitude':latitude.toString(), 'longitude':longitude.toString(), 'place_name':place_name, 'gmap_link':gmap_link});
+      }
+      setState(() {
+        _loading = false;
+      });
+    });
   }
 
   var Marker_1 = LatLng(37.898989, 129.362536);
@@ -80,18 +106,35 @@ class _GoogleMapsState extends State<GoogleMaps> {
     });
   }
 
-  void submit(){
+  void addLoc(String placename, LatLng currloc, String url){
+    Map<String, dynamic> dt = {
+      "_id" : "",
+      "place_name" : placename,
+      "describe" : "Shared by GoogleMaps",
+      "latitude" : currloc.latitude.toString(),
+      "longitude" : currloc.longitude.toString(),
+      "gmap_link": url,
+    };
+  }
+
+  void submit(LatLng currloc) async{
     _fbKey.currentState?.save();
     final inputValues = _fbKey.currentState?.value;
     final id = inputValues!['place'];
     print(id);
+    print(inputValues);
     // 중복 체크 함수 here //
 
-    final placeId = loadEvs(1.0, 1.0);
+    final placeId = await getPlaceId(currloc.latitude, currloc.longitude);
+    var detail = await getPlaceDetail(placeId);
+    var url = detail['url'];
+    print(url);
 
+    addLoc(id, currloc, url);
 
     Navigator.of(context).pop();
   }
+
   void _gotoSpace(LatLng marker_loc) {
     showModalBottomSheet(
         context: context,
@@ -130,42 +173,49 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text("장소를 입력해주세요"),
-                                      FormBuilderTextField(name: 'place',
+                                      FormBuilderTextField(
+                                        name: 'place',
                                         initialValue: "장소 이름",
-
                                       ),
                                       MaterialButton(
-                                        child:Text("SUBMIT"),
-                                        color: Colors.blue,
-                                        textColor: Colors.white,
-                                        onPressed:(){
-                                          submit();
-                                        }
-                                      )
+                                          child: Text("SUBMIT"),
+                                          color: Colors.blue,
+                                          textColor: Colors.white,
+                                          onPressed: () {
+                                            submit(marker_loc);
+                                          })
                                     ]),
                               ),
                             ))
                       ])));
         });
   }
-
+  Future _future() async {
+    await Future.delayed(Duration(milliseconds: 200));
+    return 'WW';
+  }
   //mapcreated
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
+
   Widget build(BuildContext context) {
+
+
     return Scaffold(
         backgroundColor: Colors.black12,
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.home),
+            child: Icon(Icons.home),
             onPressed: () async {
-          getUserCurrentLocation().then((value) async {
-            print(value.latitude.toString() + " " + value.longitude.toString());
-            _createMarker("Current Location", value.latitude, value.longitude,
-                "www.naver.com");
-          });
-        }),
+              getUserCurrentLocation().then((value) async {
+                print(value.latitude.toString() +
+                    " " +
+                    value.longitude.toString());
+                _createMarker("Current Location", value.latitude,
+                    value.longitude, "www.naver.com");
+              });
+            }),
         body: Row(
           children: [
             Expanded(
@@ -193,55 +243,76 @@ class _GoogleMapsState extends State<GoogleMaps> {
             Expanded(
               flex: 4,
               child: ListView.builder(
-                itemCount: productList.length,
+                itemCount: appData.places.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return InkWell(
-                    onTap: () {
-                      // show marker when tapped the list
-                      //_gotoSpace();
-                      _createMarker(
-                          productList[index][0],
-                          double.parse(productList[index][1]),
-                          double.parse(productList[index][2]),
-                          productList[index][3]);
-                    },
-                    child: Container(
-                        margin: EdgeInsets.only(top: 10),
-                        width: 100,
-                        height: 70,
-                        padding: EdgeInsets.all(0),
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                productList[index][0],
-                                style: TextStyle(
-                                  color: Colors.blue,
-                                ),
-                              ),
-                              Text(
-                                "Lat : ${productList[index][1]} / Lng : ${productList[index][2]}",
-                                textScaleFactor: 0.7,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                "서울특별시 마포구 백범로 35",
-                                textScaleFactor: 0.8,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                productList[index][3],
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ])),
-                  );
+                  return FutureBuilder(
+                      future:  loadEvs(double.parse(appData.places[index]['latitude']!),
+                          double.parse(appData.places[index]['longitude']!)),
+                      builder: (context, snapshot) {
+                        print("<show something> : ");
+                        String adr = "";
+                        if(snapshot.data == null){adr = " ";}
+                        else {adr = snapshot.data as String;}
+                        if (snapshot.hasData != true) {
+                          return Container(
+                            width: 100,
+                            height: 80,);
+                        } else {
+                          return InkWell(
+                            onTap: () {
+                              // show marker when tapped the list
+                              //_gotoSpace();
+                              _createMarker(
+                                  appData.places[index]['place_name']!,
+                                  double.parse(appData.places[index]['latitude']!),
+                                  double.parse(appData.places[index]['longitude']!),
+                                  appData.places[index]['gmap_link']!);
+                            },
+                            child: Container(
+                                margin: EdgeInsets.only(top: 10),
+                                width: 100,
+                                height: 80,
+                                padding: EdgeInsets.all(0),
+                                child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        appData.places[index]['place_name']!,
+
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 17.0
+                                        ),
+                                      ),
+                                      Text(
+                                        "위도 : ${appData.places[index]['longitude']!}   경도 : ${appData.places[index]['latitude']!}",
+                                        textScaleFactor: 0.7,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      Text(
+                                        "$adr",
+                                        textScaleFactor: 0.8,
+                                        style: TextStyle(
+                                          color: Colors.white60,
+                                        ),
+                                      ),
+                                      Text(
+                                        appData.places[index]['gmap_link']!,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ])),
+                          );
+                        }
+                      });
                 },
               ),
             )

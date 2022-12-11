@@ -4,14 +4,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
 import '../constant.dart';
 
-  Future<String?> loadEvs(double lat, double lng) async {
+  Future<String> loadEvs(double lat, double lng) async {
     // 좌표로 주소 구하기
     String gpsUrl =
-        'https://maps.googleapis.com/maps/api/geocode/json?latlng=$lat'
-        ',$lng&key=$API_KEY';
+        'https://maps.googleapis.com/maps/api/'
+        'geocode/json?latlng=$lat,$lng&key=$API_KEY&language=ko';
     final responseGps = await http.get(Uri.parse(gpsUrl));
     var gpsjson = convert.jsonDecode(responseGps.body);
-    var placeId = gpsjson['candidates'][0]['placeid']  as String;
+    print(gpsjson['results'][0]);
+    String placeId = gpsjson['results'][0]['formatted_address']  as String;
+    print("place id :");
+    print(placeId);
 
     return placeId;
   }
@@ -26,17 +29,29 @@ import '../constant.dart';
     return await Geolocator.getCurrentPosition();
   }
 
-  Future<List<String>?> getPlaceDetail(String placeId, String token) async {
+  Future<Map<String, dynamic>> getPlaceDetail(String placeId) async {
     final String baseUrl =
         'https://maps.googleapis.com/maps/api/place/details/json';
     String url =
-        '$baseUrl?key=$API_KEY&place_id=$placeId&language=ko&sessiontoken=$token';
+        '$baseUrl?key=$API_KEY&place_id=$placeId';
 
     final http.Response response = await http.get(Uri.parse(url));
     final responseData = convert.jsonDecode(response.body);
-    final result = responseData['result'];
+    final result = responseData['result'] as Map<String, dynamic>;
+    return result;
   }
-
+Future<String> getPlaceId(double lat, double lng) async {
+  String gpsUrl =
+      'https://maps.googleapis.com/maps/api/'
+      'geocode/json?latlng=$lat,$lng&key=$API_KEY&language=ko';
+  final responseGps = await http.get(Uri.parse(gpsUrl));
+  var gpsjson = convert.jsonDecode(responseGps.body);
+  print(gpsjson['results'][0]);
+  String placeId = gpsjson['results'][0]['place_id']  as String;
+  print("place id :");
+  print(placeId);
+  return placeId;
+}
   Future<List<String>?> getAddrFromLocation(double lat, double lng) async {
     final String baseUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     String url = '$baseUrl?latlng=$lat,$lng&key=$API_KEY&language=ko';

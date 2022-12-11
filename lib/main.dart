@@ -19,7 +19,7 @@ Future<void> main() async {
     await mqtt.connect().then((e) => {
           runApp(MaterialApp(
               debugShowCheckedModeBanner: false,
-              initialRoute: '/home', //test
+              initialRoute: '/camera', //test
               routes: {
                 '/home': (context) => Home(),
                 '/youtube_playlist': (context) => YoutubePlaylist(),
