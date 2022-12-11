@@ -17,10 +17,10 @@ import 'package:pointycastle/asymmetric/api.dart';
 import 'package:centerfascia_application/crypto.dart';
 
 class mqttConnection {
-  // static final MqttServerClient client =
-  //    MqttServerClient.withPort('34.64.86.97', '', 1883);
   static final MqttServerClient client =
-      MqttServerClient.withPort('43.201.126.212', '', 1883);
+      MqttServerClient.withPort('34.64.86.97', '', 1883);
+  //static final MqttServerClient client =
+  //    MqttServerClient.withPort('43.201.126.212', '', 1883);
   static late final String clientToServerTopic;
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
