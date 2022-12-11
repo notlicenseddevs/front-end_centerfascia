@@ -18,7 +18,7 @@ class _HW_LightState extends State<HW_Light> {
       /*appBar: AppBar(
         title: Text(widget.title),
       ),*/
-      backgroundColor: Colors.grey[800],
+      backgroundColor: Colors.grey[850],
       body: Center(
         child: Column(
           children: [
@@ -46,6 +46,7 @@ class _HW_LightState extends State<HW_Light> {
                 onColorChanged: (Color color) {
                   setState(() {
                     _color = color;
+                    appData.glocol = color;
                   });
                 },
                 pickerAreaHeightPercent: 0.9,
