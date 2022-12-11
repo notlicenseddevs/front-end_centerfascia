@@ -31,7 +31,7 @@ class _pinAuthState extends State<pinAuth> {
 
   @override
   Widget build(BuildContext context) {
-    /*if (appData.pinauth == true) {
+    /*if (appData.imdone == 1) {
       Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
     }*/
     ;

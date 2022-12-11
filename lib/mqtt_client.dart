@@ -7,7 +7,6 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:centerfascia_application/variables.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:encrypt/encrypt.dart' as encr;
-
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -20,7 +19,7 @@ class mqttConnection {
   static final MqttServerClient client =
       MqttServerClient.withPort('34.64.86.97', '', 1883);
   //static final MqttServerClient client =
-  //    MqttServerClient.withPort('43.201.126.212', '', 1884);
+  //    MqttServerClient.withPort('43.201.126.212', '', 1883);
   static late final String clientToServerTopic;
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
@@ -181,6 +180,10 @@ class mqttConnection {
     if (request_type == 1) {
       bool isSucceed = json['succeed'];
       print(isSucceed);
+      late final stopwatch;
+      /////////
+
+      ////////
       _loginCheckStream.add(isSucceed);
     }
     if (request_type == 0) {

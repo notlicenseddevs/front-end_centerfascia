@@ -33,6 +33,7 @@ class Appdata {
   late final RSAPublicKey public;
   late final RSAPrivateKey private;
   late String androidID;
+  var imdone = 0;
   var gloleftang = 30;
   var glorightang = 30;
   var glorearang = 30;
@@ -41,6 +42,7 @@ class Appdata {
   var glowheelheight = 50;
   var hwjson;
   late dynamic facejson;
+  //int count = 1; 테스트용도
   bool pinauth = false;
   //초기화할것
 

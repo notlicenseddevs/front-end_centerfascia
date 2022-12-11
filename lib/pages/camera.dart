@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:camera/camera.dart';
+//import 'dart:developer';
 
 class CameraAuth extends StatefulWidget {
   const CameraAuth({Key? key}) : super(key: key);
@@ -39,6 +40,7 @@ class _CameraAuthState extends State<CameraAuth> {
   XFile? image; //for captured image
   int move = 0;
   //////
+  late final stopwatch;
   void initState() {
     loadCamera();
     super.initState();
@@ -81,6 +83,8 @@ class _CameraAuthState extends State<CameraAuth> {
                         child: CircularProgressIndicator(),
                       )
                     : CameraPreview(controller!)),
+
+        camauthResult(),
         ElevatedButton.icon(
           //image capture button
           onPressed: () async {
@@ -104,9 +108,27 @@ class _CameraAuthState extends State<CameraAuth> {
                     _authrequest = true;
                     _iscorrect = false;
                     _iswrong = false;
+                    //for (int i = 0; i < 100; i++) {
                     mqtt.cameraRequest(facemsg, check);
+                    //}
                   });
                   check.stream.listen((v) => {
+                        /*if (appData.count <= 100)
+                          {// 테스트용도
+                            if (appData.count == 1)
+                              {
+                                appData.count++,
+                                stopwatch = Stopwatch()..start()
+                              }
+                            else
+                              {appData.count++},
+                            if (appData.count >= 100)
+                              {
+                                print(
+                                    "\n\n\nElapsed: ${stopwatch.elapsed}\n\n\n")
+                              }
+                          }*/
+
                         setState(() {
                           _authrequest = false;
                           _iscorrect = v;
@@ -164,7 +186,14 @@ class _CameraAuthState extends State<CameraAuth> {
                                     builder: (context) => Home()));
                           } else {
                             //couldnt find user
-
+                            Fluttertoast.showToast(
+                              msg: "사용자인식을 하지 못했습니다. 다시 찍어주세요",
+                              toastLength: Toast.LENGTH_LONG,
+                              timeInSecForIosWeb: 1,
+                              backgroundColor: Colors.black,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                           }
                         }),
                       });
@@ -177,7 +206,6 @@ class _CameraAuthState extends State<CameraAuth> {
           icon: Icon(Icons.camera),
           label: Text("Capture"),
         ),
-        camauthResult(),
       ])),
     );
   }
@@ -190,10 +218,10 @@ class _CameraAuthState extends State<CameraAuth> {
       return const Text('');
     }
     if (!_authrequest && _iscorrect && !_iswrong) {
-      return const Text('User authorized');
+      //return const Text('User authorized');
     }
     if (!_authrequest && !_iscorrect && _iswrong) {
-      return const Text('FACE AUTH ERROR');
+      //return const Text('FACE AUTH ERROR');
     }
     return const Text('');
   }
