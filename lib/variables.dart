@@ -42,6 +42,7 @@ class Appdata {
   var glowheelheight = 50;
   var hwjson;
   late dynamic facejson;
+  //int count = 1; 테스트용도
   bool pinauth = false;
   //초기화할것
 

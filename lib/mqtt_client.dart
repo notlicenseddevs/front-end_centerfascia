@@ -7,7 +7,6 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:centerfascia_application/variables.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:encrypt/encrypt.dart' as encr;
-
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -181,6 +180,10 @@ class mqttConnection {
     if (request_type == 1) {
       bool isSucceed = json['succeed'];
       print(isSucceed);
+      late final stopwatch;
+      /////////
+
+      ////////
       _loginCheckStream.add(isSucceed);
     }
     if (request_type == 0) {

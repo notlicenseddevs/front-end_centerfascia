@@ -10,6 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:camera/camera.dart';
+//import 'dart:developer';
 
 class CameraAuth extends StatefulWidget {
   const CameraAuth({Key? key}) : super(key: key);
@@ -39,6 +40,7 @@ class _CameraAuthState extends State<CameraAuth> {
   XFile? image; //for captured image
   int move = 0;
   //////
+  late final stopwatch;
   void initState() {
     loadCamera();
     super.initState();
@@ -106,9 +108,27 @@ class _CameraAuthState extends State<CameraAuth> {
                     _authrequest = true;
                     _iscorrect = false;
                     _iswrong = false;
+                    //for (int i = 0; i < 100; i++) {
                     mqtt.cameraRequest(facemsg, check);
+                    //}
                   });
                   check.stream.listen((v) => {
+                        /*if (appData.count <= 100)
+                          {// 테스트용도
+                            if (appData.count == 1)
+                              {
+                                appData.count++,
+                                stopwatch = Stopwatch()..start()
+                              }
+                            else
+                              {appData.count++},
+                            if (appData.count >= 100)
+                              {
+                                print(
+                                    "\n\n\nElapsed: ${stopwatch.elapsed}\n\n\n")
+                              }
+                          }*/
+
                         setState(() {
                           _authrequest = false;
                           _iscorrect = v;
