@@ -150,6 +150,7 @@ class _CameraAuthState extends State<CameraAuth> {
                             mqtt.hwRequest(hwrequest, hwdata);
                             hwdata.stream.listen((v) {
                               print('hhhhhhhhhhhhhhhhhhhhhhhh\n');
+                              print(v);
                               //rint(v.length());
                               appData.hwjson = v;
                               if (v['sidemirror_left'] != 0) {
@@ -180,6 +181,8 @@ class _CameraAuthState extends State<CameraAuth> {
                                 appData.glorearang = v['backmirror_angle'];
                               }
                             });
+                            // TODO get youtube data from the server : wip
+
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(

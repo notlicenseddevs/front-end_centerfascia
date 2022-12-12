@@ -33,7 +33,6 @@ class Appdata {
   late final RSAPublicKey public;
   late final RSAPrivateKey private;
   late String androidID;
-  var imdone = 0;
   var gloleftang = 30;
   var glorightang = 30;
   var glorearang = 30;
@@ -42,9 +41,42 @@ class Appdata {
   var glowheelheight = 50;
   var hwjson;
   late dynamic facejson;
-  //int count = 1; 테스트용도
   bool pinauth = false;
   //초기화할것
+
+  //Youtube Playlist Variables
+
+  List<Map<String, String>> places = [
+    {
+      "_id" : "",
+      "place_name" : "Sogang University",
+      "describe" : "Shared by GoogleMaps",
+      "latitude" : "37.5509442",
+      "longitude" : "126.9410023",
+      "gmap_link": "https://www.google.com/maps/place/%EC%84%9C%EA%B0%95%EB%8C%80%ED%95%99%EA%B5%90/data=!3m1!4b1!4m5!3m4!1s0x357c9914ca252349:0x715875d4af1d5974!8m2!3d37.5509442!4d126.9410023",
+    },{
+      "_id" : "",
+      "place_name" : "Choiga",
+      "describe" : "Shared by GoogleMaps",
+      "latitude" : "37.3689003",
+      "longitude" : "127.1064754",
+      "gmap_link": "https://www.google.com/maps/place/%EC%B5%9C%EA%B0%80%EB%8F%88%EA%B9%8C%EC%8A%A4/data=!3m1!4b1!4m5!3m4!1s0x357b58365aba8a8f:0x433be9720ba13dbc!8m2!3d37.3689003!4d127.1064754",
+    },
+  ];
+  //Google Maps Variables
+
+  List<Map<String, String>> playlist = [
+    {
+      "_id" : "",
+      "name" : "Driving Playlist",
+      "url" : "https://youtube.com/playlist?list=PLny_cRknRBbU2gE1T7qZUCzE8YLguLCrF",
+    },
+    {
+      "_id" : "",
+      "name" : "Famoust Pop Playlist",
+      "url" : "https://youtube.com/playlist?list=PLCg-HiP2W_KNOp1aFXms57EH2teADOSqD",
+    },
+  ];
 
   factory Appdata() {
     return _appData;
