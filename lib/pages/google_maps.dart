@@ -48,13 +48,19 @@ class _GoogleMapsState extends State<GoogleMaps> {
     String describe;
     StreamController<dynamic> pdata = StreamController();
     String prequest = '{"cmd_type":4, "refresh_target":2}';
+
+    appData.places.removeRange(2, appData.places.length);
+    print("print places");
+    print(appData.places);
     if(doRefresh) {
       mqtt.placeRequest(prequest, pdata);
     }
+
     setState(() {});
     pdata.stream.listen((v){
       print('GoogleMaps listen Started');
       print(v);
+      if(v != null){
       for(int k=0;k<v.length;k++){
         id = v[k]['_id'];
         place_name = v[k]['place_name']!=null ? v[k]['place_name'] : 'NONE';
@@ -67,7 +73,8 @@ class _GoogleMapsState extends State<GoogleMaps> {
       setState(() {
         _loading = false;
       });
-    });
+    }});
+
   }
   var Marker_1 = LatLng(37.898989, 129.362536);
 
@@ -110,25 +117,23 @@ class _GoogleMapsState extends State<GoogleMaps> {
   void addLoc(String placename, String describe, LatLng currloc, String url){
     Map<String, dynamic> dt = {
       "place_name" : placename,
-      "describe" : "Shared by GoogleMaps",
       "latitude" : currloc.latitude,
       "longitude" : currloc.longitude,
       "gmap_link": url,
+      "describe" : describe,
     };
     String id;
     String place_name;
     double latitude;
     double longitude;
     String gmap_link;
-    String describe;
     StreamController<dynamic> pdata = StreamController();
     Map<String, dynamic> msgObj = {
-      "cmd_type" : "5",
-      "target_list" : "2",
+      "cmd_type" : 5,
+      "target_list" : 2,
       "item" : dt,
     };
     String msg = jsonEncode(msgObj);
-    mqtt.requestToServer(msg);
     mqtt.requestToServer(msg);
     Fluttertoast.showToast(
       msg: '해당 장소가 즐겨찾기에 추가되었습니다.',
@@ -136,7 +141,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
     );
     loadData(false);
-    setState((){});
   }
 
   void submit(LatLng currloc) async{
