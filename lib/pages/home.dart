@@ -96,7 +96,7 @@ class _HomeState extends State<Home> {
                         onPressed: () {
 
                           StreamController<dynamic> pldata = StreamController();
-                          String plrequest = '{"cmd_type":4, "refresh_target":1"}';
+                          String plrequest = '{"cmd_type":4, "refresh_target":1}';
                           String id;
                           String playlistName;
                           String playlistUrl;

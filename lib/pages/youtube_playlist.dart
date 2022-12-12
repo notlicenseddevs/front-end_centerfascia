@@ -135,7 +135,7 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.all(9.0),
+                                          padding: const EdgeInsets.fromLTRB(4,4,4,4),
                                           child: Text("${appData.playlist[index]['name']}",
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
