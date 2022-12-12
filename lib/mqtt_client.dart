@@ -25,7 +25,7 @@ class mqttConnection {
   static late final String clientToServerTopic;
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
-  static late StreamController<dynamic> _playlistDataStream;
+  static late dynamic _playlistFunction;
   static late StreamController<dynamic> _placeDataStream;
   static late StreamController<bool> _cameraCheckStream;
   static late StreamController<dynamic> _hwDataStream;
@@ -108,7 +108,13 @@ class mqttConnection {
     client.publishMessage(
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
-
+  void PlaylistRequest(String msg, dynamic data) async {
+    final builder = MqttClientPayloadBuilder();
+    _playlistFunction = data;
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
   //stream request for camera
   void cameraRequest(String msg, StreamController<bool> check) async {
     _cameraCheckStream = check;
@@ -163,13 +169,7 @@ class mqttConnection {
   }
  // TODO make the data structure to receive json file : WIP
 
-  void PlaylistRequest(String msg, StreamController<dynamic> data) async {
-    final builder = MqttClientPayloadBuilder();
-    _playlistDataStream = data;
-    builder.addString(msg);
-    client.publishMessage(
-        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
-  }
+
 
 
   void GoogleMapsSendRequest(){
@@ -259,11 +259,15 @@ class mqttConnection {
 
   void swHandler(dynamic json) {
     print(json);
+    _playlistFunction(json);
   }
 
   void gpsHandler(dynamic json) {
     print(json);
     _placeDataStream.add(json);
+  }
+  void playlistHandler(dynamic json){
+    print(json);
   }
 
   void faceauthHandler(dynamic json) {

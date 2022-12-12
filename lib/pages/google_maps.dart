@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:centerfascia_application/mqtt_client.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/utils.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -37,7 +39,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     loadData(true);
 
   }
-  void loadData(bool doRefresh){
+  void loadData(bool doRefresh) async{
     String id;
     String place_name;
     double latitude;
@@ -46,13 +48,19 @@ class _GoogleMapsState extends State<GoogleMaps> {
     String describe;
     StreamController<dynamic> pdata = StreamController();
     String prequest = '{"cmd_type":4, "refresh_target":2}';
+
+    appData.places.removeRange(2, appData.places.length);
+    print("print places");
+    print(appData.places);
     if(doRefresh) {
       mqtt.placeRequest(prequest, pdata);
     }
+
     setState(() {});
     pdata.stream.listen((v){
       print('GoogleMaps listen Started');
       print(v);
+      if(v != null){
       for(int k=0;k<v.length;k++){
         id = v[k]['_id'];
         place_name = v[k]['place_name']!=null ? v[k]['place_name'] : 'NONE';
@@ -65,9 +73,9 @@ class _GoogleMapsState extends State<GoogleMaps> {
       setState(() {
         _loading = false;
       });
-    });
-  }
+    }});
 
+  }
   var Marker_1 = LatLng(37.898989, 129.362536);
 
   late final Set<Marker> _markers = {};
@@ -106,21 +114,40 @@ class _GoogleMapsState extends State<GoogleMaps> {
     });
   }
 
-  void addLoc(String placename, LatLng currloc, String url){
+  void addLoc(String placename, String describe, LatLng currloc, String url){
     Map<String, dynamic> dt = {
-      "_id" : "",
       "place_name" : placename,
-      "describe" : "Shared by GoogleMaps",
-      "latitude" : currloc.latitude.toString(),
-      "longitude" : currloc.longitude.toString(),
+      "latitude" : currloc.latitude,
+      "longitude" : currloc.longitude,
       "gmap_link": url,
+      "describe" : describe,
     };
+    String id;
+    String place_name;
+    double latitude;
+    double longitude;
+    String gmap_link;
+    StreamController<dynamic> pdata = StreamController();
+    Map<String, dynamic> msgObj = {
+      "cmd_type" : 5,
+      "target_list" : 2,
+      "item" : dt,
+    };
+    String msg = jsonEncode(msgObj);
+    mqtt.requestToServer(msg);
+    Fluttertoast.showToast(
+      msg: '해당 장소가 즐겨찾기에 추가되었습니다.',
+      gravity: ToastGravity.BOTTOM,
+
+    );
+    loadData(false);
   }
 
   void submit(LatLng currloc) async{
     _fbKey.currentState?.save();
     final inputValues = _fbKey.currentState?.value;
     final id = inputValues!['place'];
+    final describe = inputValues!['describe'];
     print(id);
     print(inputValues);
     // 중복 체크 함수 here //
@@ -130,7 +157,7 @@ class _GoogleMapsState extends State<GoogleMaps> {
     var url = detail['url'];
     print(url);
 
-    addLoc(id, currloc, url);
+    addLoc(id, describe, currloc, url);
 
     Navigator.of(context).pop();
   }
@@ -172,10 +199,29 @@ class _GoogleMapsState extends State<GoogleMaps> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text("장소를 입력해주세요"),
+                                      Text("이름을 입력해주세요",
+                                        style: TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 15.0,
+                                          fontWeight: FontWeight.bold,
+                                        ),),
                                       FormBuilderTextField(
                                         name: 'place',
-                                        initialValue: "장소 이름",
+                                        initialValue: "Selected Place",
+                                      ),
+                                      SizedBox(
+                                        height:30,
+                                        width:100,
+                                      ),
+                                      Text("설명을 입력해주세요",
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontSize: 15.0,
+                                        fontWeight: FontWeight.bold,
+                                      ),),
+                                      FormBuilderTextField(
+                                        name: 'describe',
+                                        initialValue: "Added by User",
                                       ),
                                       MaterialButton(
                                           child: Text("SUBMIT"),
