@@ -81,6 +81,10 @@ class _pinAuthState extends State<pinAuth> {
                         if (!_authrequest && _iscorrect && !_iswrong) {
                           //if pin is correct
                           appData.pinauth = true;
+
+                          //TODO get google maps info : WIP
+
+
                           Navigator.push(
                               context,
                               MaterialPageRoute(

@@ -7,6 +7,7 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:centerfascia_application/variables.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:encrypt/encrypt.dart' as encr;
+
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -16,13 +17,15 @@ import 'package:pointycastle/asymmetric/api.dart';
 import 'package:centerfascia_application/crypto.dart';
 
 class mqttConnection {
-  static final MqttServerClient client =
-      MqttServerClient.withPort('34.64.86.97', '', 1883);
   //static final MqttServerClient client =
+  //    MqttServerClient.withPort('34.64.86.97', '', 1883);
+  static final MqttServerClient client =
+      MqttServerClient.withPort('43.201.126.212', '', 1883);
   //    MqttServerClient.withPort('43.201.126.212', '', 1883);
   static late final String clientToServerTopic;
   static late final String serverToClientTopic;
   static late StreamController<bool> _loginCheckStream;
+  static late StreamController<dynamic> _playlistDataStream;
   static late StreamController<dynamic> _placeDataStream;
   static late StreamController<bool> _cameraCheckStream;
   static late StreamController<dynamic> _hwDataStream;
@@ -37,7 +40,7 @@ class mqttConnection {
   static bool faceauthdone = false;
   static bool faceautprocessing = false;
 
-  /////////
+
   mqttConnection() {
     client.setProtocolV311();
     client.onDisconnected = onDisconnected;
@@ -77,9 +80,9 @@ class mqttConnection {
     clientToServerTopic = '$jsonTopicName/user_command';
     client.subscribe('${serverToClientTopic}/reply', MqttQos.atMostOnce);
     ////////////////////관우야 너꺼다
-    //client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
-    //client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
-    /////////////////관우야 너꺼다
+    client.subscribe('${serverToClientTopic}/sw_configs', MqttQos.atMostOnce);
+    client.subscribe('${serverToClientTopic}/gps_configs', MqttQos.atMostOnce);
+    ////////////////////관우야 너꺼다
     client.subscribe('${serverToClientTopic}/hw_configs', MqttQos.atMostOnce);
   }
 
@@ -158,7 +161,47 @@ class mqttConnection {
     client.publishMessage(
         clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
   }
+ // TODO make the data structure to receive json file : WIP
 
+  void PlaylistRequest(String msg, StreamController<dynamic> data) async {
+    final builder = MqttClientPayloadBuilder();
+    _playlistDataStream = data;
+    builder.addString(msg);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+
+  void GoogleMapsSendRequest(){
+    final builder = MqttClientPayloadBuilder();
+    Map<String, Object> gmobj = {
+      "" : "",
+
+    };
+    Map<String, Object> spit = {
+      "cmd_type": "",
+      "": gmobj,
+    };
+    var spitjson = convert.jsonEncode(spit);
+    builder.addString(spitjson);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+  void playlistSendRequest(){
+    final builder = MqttClientPayloadBuilder();
+    Map<String, Object> ytobj = {
+      "" : "",
+    };
+    Map<String, Object> spit = {
+      "cmd_type": "",
+      "": ytobj,
+    };
+    var spitjson = convert.jsonEncode(spit);
+    builder.addString(spitjson);
+    client.publishMessage(
+        clientToServerTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+////// TODO /////////
   void turnoffRequest() {
     final builder = MqttClientPayloadBuilder();
     print("TURNING OFF");
@@ -319,7 +362,7 @@ class mqttConnection {
     appData.androidID = androidtmp.id;
     await _crypto.initialize();
     try {
-      client.keepAlivePeriod = 10000;
+      //client.keepAlivePeriod = 10000;
       await client.connect();
     } on NoConnectionException catch (e) {
       // Raised by the client when connection fails.

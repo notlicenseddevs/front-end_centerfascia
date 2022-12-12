@@ -1,5 +1,7 @@
 //import 'dart:html';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:centerfascia_application/variables.dart';
@@ -92,6 +94,29 @@ class _HomeState extends State<Home> {
                         //icon: ImageIcon(AssetImage('image/google_maps.png')),
                         icon: Icon(Icons.play_circle_fill, color: Colors.black),
                         onPressed: () {
+
+                          StreamController<dynamic> pldata = StreamController();
+                          String plrequest = '{"cmd_type":4, "refresh_target":1"}';
+                          String id;
+                          String playlistName;
+                          String playlistUrl;
+
+                          mqtt.PlaylistRequest(plrequest, pldata);
+                          pldata.stream.listen((v){
+                            print('Youtube Playlist listen Started');
+                            for(int k=0;k<v['playlist'].length;k++){
+                              id = v['playlist'][k]['_id'];
+                              playlistName = v['playlist'][k]['name'];
+                              playlistUrl = v['playlist'][k]['url'];
+                              appData.playlist.add({'_id':id, 'name':playlistName, 'url':playlistUrl});
+                            }
+                            print(appData.playlist);
+                          });
+
+
+
+
+
                           Navigator.pushNamed(context, '/youtube_playlist',
                               arguments: {});
                         },
