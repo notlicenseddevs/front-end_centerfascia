@@ -13,7 +13,7 @@ class YoutubePlaylist extends StatefulWidget {
   @override
   State<YoutubePlaylist> createState() => _YoutubePlaylistState();
 }
-var json;
+
 class _YoutubePlaylistState extends State<YoutubePlaylist> {
   mqttConnection mqtt = mqttConnection();
   final List<String> _videoUrlList = [
@@ -26,7 +26,6 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
 
   @override
   void initState()  {
-
     super.initState();
     loadPLData();
   }
@@ -45,7 +44,6 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
   }
 
   void getStreamData(Map<String, dynamic> v) {
-
     String id;
     String playlistName;
     String playlistUrl;
@@ -60,14 +58,11 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
       appData.playlist.add(
           {'_id': id, 'name': playlistName, 'url': playlistUrl});
     }
-    setState(() {
-      _loaded = true;
-    });
+    setPlaylist(0);
     print(v);
     }
 
   void getPlaylist() async{
-    print(YoutubePlayer.convertUrlToId(appData.playlist[0]['url']!).toString());
     await fetchVideos(appData.playlist[0]['url']?.substring(34), 20);
     print("#TEST : appData");
     print(appData.playlist);
@@ -86,11 +81,12 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
     for(int s = 0 ; s < 20 ; s ++){
       _videoUrlList.add("https://youtu.be/${jsonResponse['items'][s]['snippet']['resourceId']['videoId']}");
     }
-    print(_videoUrlList);
+    print(_videoUrlList[0]);
     print(YoutubePlayer.convertUrlToId(_videoUrlList[0]));
-    lYTC[0].load(YoutubePlayer.convertUrlToId(_videoUrlList[0])!, startAt: 0);
     fillYTlists(_videoUrlList);
     print(lYTC[0].initialVideoId);
+    print('222222222222222');
+    lYTC[0].load(YoutubePlayer.convertUrlToId(_videoUrlList[0])!, startAt: 0);
   }
 
   List<YoutubePlayerController> lYTC = [];
@@ -100,29 +96,26 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
   fillYTlists(List<String> _videoUrlList) {
     lYTC.clear();
     cStates.clear();
-    for (var element in _videoUrlList) {
-      String _id = YoutubePlayer.convertUrlToId(element)!;
-      YoutubePlayerController _ytController = YoutubePlayerController(
-        initialVideoId: _id,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          enableCaption: true,
-          captionLanguage: 'en',
-        ),
-      );
+    String _id = YoutubePlayer.convertUrlToId(_videoUrlList[0])!;
+    YoutubePlayerController _ytController = YoutubePlayerController(
+      initialVideoId: _id,
+      flags: const YoutubePlayerFlags(
+        autoPlay: false,
+        enableCaption: true,
+        captionLanguage: 'en',
+      ),
+    );
 
-      _ytController.addListener(() {
-        print('for $_id got isPlaying state ${_ytController.value.isPlaying}');
-        if (cStates[_id] != _ytController.value.isPlaying) {
-        if (mounted) {
-          setState(() {
-            cStates[_id] = _ytController.value.isPlaying;
-          });
-        }
-      }});
-
-      lYTC.add(_ytController);
-    }
+    _ytController.addListener(() {
+      if (cStates[_id] != _ytController.value.isPlaying) {
+      if (mounted) {
+        setState(() {
+          cStates[_id] = _ytController.value.isPlaying;
+        });
+      }
+    }});
+    lYTC.add(_ytController);
+    _loaded = true;
   }
   late List<YoutubePlayer> YoutubePlayerList;
   @override
@@ -133,14 +126,13 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget MainPL(){
     return Scaffold(
-      backgroundColor: Colors.black54,
       body: Row(
         children: [
           Container(
             alignment: Alignment.topRight,
+            color: Colors.black87,
             width: 480.0,
             child: Padding(
                 padding: const EdgeInsets.all(10.0),
@@ -155,15 +147,18 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                             height: 100.0,
                             width: 440.0,
                             decoration: const BoxDecoration(
-                              color: Colors.black12,
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
+                              BorderRadius.all(Radius.circular(12)),
                             ),
                             child: InkWell(
 
                               child: Container(
                                 width:430.0,
                                 height: 100.0,
+                                decoration: const BoxDecoration(
+                                  color: Colors.black38,
+                                  borderRadius: const BorderRadius.all(Radius.circular(12))
+                                ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
@@ -172,17 +167,17 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Padding(
-                                          padding: const EdgeInsets.fromLTRB(4,4,4,4),
+                                          padding: const EdgeInsets.fromLTRB(8,8,8,8),
                                           child: Text("${appData.playlist[index]['name']}",
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
-                                            textAlign: TextAlign.start,
-                                            style: TextStyle(color: Colors.blue,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 17.0)),
+                                              textAlign: TextAlign.start,
+                                              style: TextStyle(color: Colors.blue,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 18.0)),
                                         ),
                                         Padding(
-                                          padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                          padding: const EdgeInsets.fromLTRB(6, 4, 8, 8),
                                           child: Text("유튜브 재생목록",
                                               overflow: TextOverflow.ellipsis,
                                               maxLines: 1,
@@ -193,13 +188,13 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                                         Container(
                                           width: 430.0,
                                           child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                            padding: const EdgeInsets.fromLTRB(6, 2, 6, 6),
                                             child: Text("${appData.playlist[index]['url']}",
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(color: Colors.white12,
-                                                  fontSize: 13.0)),
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(color: Colors.white12,
+                                                    fontSize: 13.0)),
                                           ),
                                         ),
                                       ],
@@ -207,10 +202,12 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                                   ],
                                 ),
                               ),
-
                               onTap: () {
+
+                                setPlaylist(index);
+                                print('############### url index : $index / ${YoutubePlayer.convertUrlToId(_videoUrlList[0])}');
+
                                 setState(() {
-                                  setPlaylist(index);
                                 });
                               },
                             ),
@@ -219,9 +216,14 @@ class _YoutubePlaylistState extends State<YoutubePlaylist> {
                       );
                     })),
           ),
-          _loaded? YoutubePlaylistSelected(cStates, lYTC, _videoUrlList):CircularProgressIndicator(),
+          Container(
+              child: _loaded? YoutubePlaylistSelected(cStates, lYTC, _videoUrlList):CircularProgressIndicator()),
         ],
       ),
     );
+  }
+  @override
+  Widget build(BuildContext context) {
+    return _loaded? MainPL():Container(child:CircularProgressIndicator());
   }
 }

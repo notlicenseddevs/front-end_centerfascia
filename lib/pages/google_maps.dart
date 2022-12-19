@@ -250,7 +250,6 @@ class _GoogleMapsState extends State<GoogleMaps> {
 
 
     return Scaffold(
-        backgroundColor: Colors.black12,
         floatingActionButton: FloatingActionButton(
             child: Icon(Icons.home),
             onPressed: () async {
@@ -262,107 +261,119 @@ class _GoogleMapsState extends State<GoogleMaps> {
                     value.longitude, "www.naver.com");
               });
             }),
-        body: Row(
-          children: [
-            Expanded(
-              flex: 8,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: GoogleMap(
-                  // 메인 구글 맵스 표시
-                  onCameraIdle: () {},
-                  onCameraMoveStarted: () {},
-                  onTap: (currloc) {
-                    _createMarker(
-                        "현재위치", currloc.latitude, currloc.longitude, "");
-                  },
-                  myLocationButtonEnabled: true,
-                  myLocationEnabled: true,
-                  mapType: MapType.normal,
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: _initialCameraPostion,
+        body: Container(
+          color : Colors.black87,
+          child: Row(
+            children: [
+              Expanded(
+                flex: 8,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GoogleMap(
+                    // 메인 구글 맵스 표시
+                    onCameraIdle: () {},
+                    onCameraMoveStarted: () {},
+                    onTap: (currloc) {
+                      _createMarker(
+                          "현재위치", currloc.latitude, currloc.longitude, "");
+                    },
+                    myLocationButtonEnabled: true,
+                    myLocationEnabled: true,
+                    mapType: MapType.normal,
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition: _initialCameraPostion,
 
-                  markers: _markers,
+                    markers: _markers,
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              flex: 4,
-              child: ListView.builder(
-                itemCount: appData.places.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return FutureBuilder(
-                      future:  loadEvs(double.parse(appData.places[index]['latitude']!),
-                          double.parse(appData.places[index]['longitude']!)),
-                      builder: (context, snapshot) {
-                        print("<show something> : ");
-                        String adr = "";
-                        if(snapshot.data == null){adr = " ";}
-                        else {adr = snapshot.data as String;}
-                        if (snapshot.hasData != true) {
-                          return Container(
-                            width: 100,
-                            height: 80,);
-                        } else {
-                          return InkWell(
-                            onTap: () {
-                              // show marker when tapped the list
-                              //_gotoSpace();
-                              _createMarker(
-                                  appData.places[index]['place_name']!,
-                                  double.parse(appData.places[index]['latitude']!),
-                                  double.parse(appData.places[index]['longitude']!),
-                                  appData.places[index]['gmap_link']!);
-                            },
-                            child: Container(
-                                margin: EdgeInsets.only(top: 10),
-                                width: 100,
-                                height: 80,
-                                padding: EdgeInsets.all(0),
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        appData.places[index]['place_name']!,
+              Expanded(
+                flex: 4,
+                child: ListView.builder(
+                  itemCount: appData.places.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return FutureBuilder(
+                        future:  loadEvs(double.parse(appData.places[index]['latitude']!),
+                            double.parse(appData.places[index]['longitude']!)),
+                        builder: (context, snapshot) {
+                          print("<show something> : ");
+                          String adr = "";
+                          if(snapshot.data == null){adr = " ";}
+                          else {adr = snapshot.data as String;}
+                          if (snapshot.hasData != true) {
+                            return Container(
+                              width: 100,
+                              height: 80,);
+                          } else {
+                            return Container(
+                               child: InkWell(
+                                onTap: () {
+                                  // show marker when tapped the list
+                                  //_gotoSpace();
+                                  _createMarker(
+                                      appData.places[index]['place_name']!,
+                                      double.parse(appData.places[index]['latitude']!),
+                                      double.parse(appData.places[index]['longitude']!),
+                                      appData.places[index]['gmap_link']!);
+                                },
+                                child: Container(
+                                    decoration: const BoxDecoration(
+                                        color: Colors.black38,
+                                        borderRadius: const BorderRadius.all(Radius.circular(12))
+                                    ),
+                                    margin: EdgeInsets.only(top: 10),
+                                    width: 100,
+                                    height: 80,
+                                    padding: EdgeInsets.all(0),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              appData.places[index]['place_name']!,
 
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 17.0
-                                        ),
-                                      ),
-                                      Text(
-                                        "위도 : ${appData.places[index]['longitude']!}   경도 : ${appData.places[index]['latitude']!}",
-                                        textScaleFactor: 0.7,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        "$adr",
-                                        textScaleFactor: 0.8,
-                                        style: TextStyle(
-                                          color: Colors.white60,
-                                        ),
-                                      ),
-                                      Text(
-                                        appData.places[index]['gmap_link']!,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ])),
-                          );
-                        }
-                      });
-                },
-              ),
-            )
-          ],
+                                              style: TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 17.0
+                                              ),
+                                            ),
+                                            Text(
+                                              "위도 : ${appData.places[index]['longitude']!}   경도 : ${appData.places[index]['latitude']!}",
+                                              textScaleFactor: 0.7,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            Text(
+                                              "$adr",
+                                              textScaleFactor: 0.8,
+                                              style: TextStyle(
+                                                color: Colors.white60,
+                                              ),
+                                            ),
+                                            Text(
+                                              appData.places[index]['gmap_link']!,
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ]),
+                                    )),
+                              ),
+                            );
+                          }
+                        });
+                  },
+                ),
+              )
+            ],
+          ),
         ));
   }
 }

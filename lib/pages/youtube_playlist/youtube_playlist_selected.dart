@@ -10,24 +10,20 @@ Future _future() async {
   await Future.delayed(Duration(milliseconds: 700));
   return 'WW';
 }
-
+bool _fetchcheck = false;
 Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
     List<String> videoUrlList) {
+
   print("enter playlist select\n");
   print("${lYTC[0].initialVideoId}");
   print("lYTC[0] values >");
   print(lYTC[0].value.metaData);
   print("cstates values >");
   print(cStates);
-  return Container(
+  return _fetchcheck? Container(
     width: 475.0,
-    child: FutureBuilder(
-      future: _future(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData != true) {
-          return Container();
-        } else {
-          return Column(
+      color: Colors.black54,
+      child : Column(
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(10, 25, 10, 10),
@@ -52,9 +48,6 @@ Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
                             ProgressBar(isExpanded: true),
                             FullScreenButton(),
                           ],
-                          onReady: () {
-                            print('onReady for ');
-                          },
                           onEnded: (YoutubeMetaData _md) {
                             // 끝나고 다음 영상 재생
                             lYTC[0].reset();
@@ -71,57 +64,57 @@ Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
                   height: 270.0,
                   width: 465.0,
                   child: ListView.builder(
-                    itemCount: lYTC.length,
+                    itemCount: videoUrlList.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      print(
-                          "title : ${jsonResponse['items'][index]['snippet']['title']}");
-                      print(
-                          "img url ${jsonResponse['items'][index]['snippet']['thumbnails']
-                          ['default']}");
                       if ("${jsonResponse['items'][index]['snippet']['title']}"
                           != "Private video") {
                         if (index != 0) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Row(
-                              children: [
-                                Image.network(
-                                    "${jsonResponse['items'][index]['snippet']['thumbnails']['default']['url']}"),
-                                Column(
-                                    crossAxisAlignment: CrossAxisAlignment
-                                        .start,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 335.0,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: Text(
-                                              "${jsonResponse['items'][index]['snippet']['title']}",
-                                              maxLines: 2,
-                                              overflow: TextOverflow.fade,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                  color: Colors.blue,
-                                                  fontSize: 15.0)),
+                            child: Container(decoration: const BoxDecoration(
+                                color: Colors.black38,
+                                borderRadius: const BorderRadius.all(Radius.circular(12))
+                            ),
+                              child: Row(
+                                children: [
+                                  Image.network(
+                                      "${jsonResponse['items'][index]['snippet']['thumbnails']['default']['url']}"),
+                                  Column(
+                                      crossAxisAlignment: CrossAxisAlignment
+                                          .start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 335.0,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(2.0),
+                                            child: Text(
+                                                "${jsonResponse['items'][index]['snippet']['title']}",
+                                                maxLines: 2,
+                                                overflow: TextOverflow.fade,
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontSize: 15.0)),
+                                          ),
                                         ),
-                                      ),
-                                      Container(
-                                        width: 335.0,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(2.0),
-                                          child: Text(
-                                              "www.youtube.com/watch?v=${jsonResponse['items'][index]['snippet']['resourceId']['videoId']}",
-                                              overflow: TextOverflow.fade,
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(
-                                                  color: Colors.white54,
-                                                  fontSize: 15.0)),
+                                        Container(
+                                          width: 335.0,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(2.0),
+                                            child: Text(
+                                                "www.youtube.com/watch?v=${jsonResponse['items'][index]['snippet']['resourceId']['videoId']}",
+                                                overflow: TextOverflow.fade,
+                                                textAlign: TextAlign.start,
+                                                style: TextStyle(
+                                                    color: Colors.white54,
+                                                    fontSize: 15.0)),
+                                          ),
                                         ),
-                                      ),
-                                    ]),
-                              ],
+                                      ]),
+                                ],
+                              ),
                             ),
                           );
                         }
@@ -140,11 +133,8 @@ Widget YoutubePlaylistSelected(Map cStates, List<YoutubePlayerController> lYTC,
                 ),
               ),
             ],
-          );
-        }
-        },
-    ),
-  );
+          )
+  ):const CircularProgressIndicator();
 
 }
 
@@ -155,6 +145,7 @@ Future<void> fetchVideos(String? playlistLink, int itemNum) async {
 
   final response = await http.get(Uri.parse(url));
   jsonResponse = convert.jsonDecode(response.body);
+  _fetchcheck = true;
   //print(jsonResponse[0]);
   //print(jsonResponse[0]['items'][0]['snippet']['resourceId']);
   //imgurl.add(jsonResponse[index]['items'][0]['snippet']['thumbnails']['high']['url']);
